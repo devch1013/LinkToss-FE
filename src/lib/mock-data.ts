@@ -1,4 +1,4 @@
-import type { User, Repository, Document, Tag, RepositoryMember, Invitation, DashboardStats } from '@/types';
+import type { DashboardStats, Document, Invitation, Repository, RepositoryMember, Tag, User } from '@/types';
 
 // Mock Current User
 export const mockCurrentUser: User = {
@@ -215,7 +215,7 @@ export const mockDocuments: Document[] = [
     content: '# Dribbble\n\n디자이너들의 작품을 공유하는 플랫폼\n\n## 활용법\n- 트렌드 파악\n- 색상 조합 참고\n- UI 패턴 학습',
     contentPreview: '디자이너들의 작품을 공유하는 플랫폼',
     linkMetadata: {
-      ogTitle: 'Dribbble - Discover the World's Top Designers',
+      ogTitle: "Dribbble - Discover the World's Top Designers",
       ogDescription: 'Find Top Designers & Creative Professionals',
       siteName: 'Dribbble',
     },
