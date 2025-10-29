@@ -1,13 +1,13 @@
 'use client';
 
+import type { Dashboard, Deck, Drop } from '@/apis/data-contracts';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { mockStatsApi } from '@/lib/mock-api';
-import type { DashboardStats, Deck, Drop } from '@/types';
+import { usersApi } from '@/lib/api-client';
 import { ExternalLink, FileText, FolderOpen, Globe, Tag } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -16,7 +16,7 @@ import { useEffect, useState } from 'react';
 export default function DashboardPage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<Dashboard | null>(null);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -26,8 +26,8 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const loadStats = async () => {
-      const data = await mockStatsApi.getDashboardStats();
-      setStats(data);
+      const response = await usersApi.usersProfileDashboard();
+      setStats(response.data);
     };
 
     if (user) {
@@ -70,7 +70,7 @@ export default function DashboardPage() {
                     <FolderOpen className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.deckCount}개</div>
+                    <div className="text-2xl font-bold">{stats.overview.deck_count}개</div>
                     <p className="text-xs text-muted-foreground">
                       체계적으로 관리 중
                     </p>
@@ -83,7 +83,7 @@ export default function DashboardPage() {
                     <FileText className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.dropCount}개</div>
+                    <div className="text-2xl font-bold">{stats.overview.drop_count}개</div>
                     <p className="text-xs text-muted-foreground">
                       저장된 링크
                     </p>
@@ -96,7 +96,7 @@ export default function DashboardPage() {
                     <Globe className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.publicDeckCount}개</div>
+                    <div className="text-2xl font-bold">{stats.overview.public_deck_count}개</div>
                     <p className="text-xs text-muted-foreground">
                       공유 중
                     </p>
@@ -109,7 +109,7 @@ export default function DashboardPage() {
                     <Tag className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.tagCount}개</div>
+                    <div className="text-2xl font-bold">{stats.overview.tag_count}개</div>
                     <p className="text-xs text-muted-foreground">
                       분류 중
                     </p>
@@ -127,9 +127,9 @@ export default function DashboardPage() {
                 </Button>
               </div>
 
-              {stats && stats.recentDrops.length > 0 ? (
+              {stats && stats.recent_drops.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {stats.recentDrops.map((drop: Drop) => (
+                  {stats.recent_drops.map((drop: Drop) => (
                     <Link key={drop.id} href={`/drop/${drop.id}`}>
                       <Card className="h-full transition-all hover:shadow-md">
                         <CardHeader>
@@ -140,17 +140,17 @@ export default function DashboardPage() {
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          {drop.contentPreview && (
+                          {drop.content && (
                             <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
-                              {drop.contentPreview}
+                              {drop.content}
                             </p>
                           )}
                           <div className="flex flex-wrap gap-1">
-                            {drop.tags.slice(0, 3).map((tag) => (
-                              <Badge key={tag.id} variant="secondary" className="text-xs">
-                                #{tag.name}
+                            {typeof drop.tags === 'string' ? (
+                              <Badge variant="secondary" className="text-xs">
+                                #{drop.tags}
                               </Badge>
-                            ))}
+                            ) : null}
                           </div>
                         </CardContent>
                       </Card>
@@ -176,17 +176,17 @@ export default function DashboardPage() {
                 <h2 className="text-2xl font-semibold">📁 자주 사용하는 Deck</h2>
               </div>
 
-              {stats && stats.frequentDecks.length > 0 ? (
+              {stats && stats.frequent_decks.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  {stats.frequentDecks.map((deck: Deck) => (
+                  {stats.frequent_decks.map((deck: Deck) => (
                     <Link key={deck.id} href={`/deck/${deck.id}`}>
                       <Card className="h-full transition-all hover:shadow-md">
                         <CardHeader>
                           <div className="flex items-center gap-2">
-                            <span className="text-2xl">{deck.icon}</span>
+                            <span className="text-2xl">📁</span>
                             <div className="flex-1">
                               <CardTitle className="line-clamp-1 text-base">{deck.name}</CardTitle>
-                              {deck.isPublic && (
+                              {deck.is_public && (
                                 <Badge variant="outline" className="mt-1 text-xs">
                                   🌍 Public
                                 </Badge>
@@ -201,10 +201,7 @@ export default function DashboardPage() {
                             </p>
                           )}
                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span>{deck.dropCount} drops</span>
-                            {deck.subDeckCount > 0 && (
-                              <span>{deck.subDeckCount} sub-decks</span>
-                            )}
+                            <span>{deck.children_count || 0} items</span>
                           </div>
                         </CardContent>
                       </Card>

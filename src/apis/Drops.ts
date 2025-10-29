@@ -27,17 +27,17 @@ import {
   DropsCommentsTreeParams,
   DropsCommentsUpdateData,
   DropsCommentsUpdateParams,
-  DropsDropsCreateData,
-  DropsDropsDeleteData,
-  DropsDropsDeleteParams,
-  DropsDropsListData,
-  DropsDropsListParams,
-  DropsDropsReadData,
-  DropsDropsReadParams,
-  DropsDropsSearchData,
-  DropsDropsSearchParams,
-  DropsDropsUpdateData,
-  DropsDropsUpdateParams,
+  DropsCreateData,
+  DropsDeleteData,
+  DropsDeleteParams,
+  DropsListData,
+  DropsListParams,
+  DropsReadData,
+  DropsReadParams,
+  DropsSearchData,
+  DropsSearchParams,
+  DropsUpdateData,
+  DropsUpdateParams,
   DropUpdate,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
@@ -45,6 +45,46 @@ import { ContentType, HttpClient, RequestParams } from "./http-client";
 export class Drops<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
+  /**
+   * @description 특정 deck의 drop 목록을 조회합니다.
+   *
+   * @tags drops
+   * @name DropsList
+   * @summary Drop 목록 조회
+   * @request GET:/drops/
+   * @secure
+   * @response `200` `DropsListData`
+   */
+  dropsList = (query: DropsListParams, params: RequestParams = {}) =>
+    this.request<DropsListData, any>({
+      path: `/drops/`,
+      method: "GET",
+      query: query,
+      secure: true,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 새로운 drop을 생성합니다. 태그도 함께 생성할 수 있습니다.
+   *
+   * @tags drops
+   * @name DropsCreate
+   * @summary Drop 생성
+   * @request POST:/drops/
+   * @secure
+   * @response `201` `DropsCreateData`
+   * @response `400` `void` Bad request
+   */
+  dropsCreate = (data: DropCreate, params: RequestParams = {}) =>
+    this.request<DropsCreateData, void>({
+      path: `/drops/`,
+      method: "POST",
+      body: data,
+      secure: true,
+      type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
   /**
    * @description 특정 drop의 최상위 댓글 목록을 조회합니다.
    *
@@ -203,61 +243,18 @@ export class Drops<
       ...params,
     });
   /**
-   * @description 특정 deck의 drop 목록을 조회합니다.
-   *
-   * @tags drops
-   * @name DropsDropsList
-   * @summary Drop 목록 조회
-   * @request GET:/drops/drops/
-   * @secure
-   * @response `200` `DropsDropsListData`
-   */
-  dropsDropsList = (query: DropsDropsListParams, params: RequestParams = {}) =>
-    this.request<DropsDropsListData, any>({
-      path: `/drops/drops/`,
-      method: "GET",
-      query: query,
-      secure: true,
-      format: "json",
-      ...params,
-    });
-  /**
-   * @description 새로운 drop을 생성합니다. 태그도 함께 생성할 수 있습니다.
-   *
-   * @tags drops
-   * @name DropsDropsCreate
-   * @summary Drop 생성
-   * @request POST:/drops/drops/
-   * @secure
-   * @response `201` `DropsDropsCreateData`
-   * @response `400` `void` Bad request
-   */
-  dropsDropsCreate = (data: DropCreate, params: RequestParams = {}) =>
-    this.request<DropsDropsCreateData, void>({
-      path: `/drops/drops/`,
-      method: "POST",
-      body: data,
-      secure: true,
-      type: ContentType.Json,
-      format: "json",
-      ...params,
-    });
-  /**
    * @description 제목, 내용, 메모, 태그로 drop을 검색합니다.
    *
    * @tags drops
-   * @name DropsDropsSearch
+   * @name DropsSearch
    * @summary Drop 검색
-   * @request GET:/drops/drops/search/
+   * @request GET:/drops/search/
    * @secure
-   * @response `200` `DropsDropsSearchData`
+   * @response `200` `DropsSearchData`
    */
-  dropsDropsSearch = (
-    query: DropsDropsSearchParams,
-    params: RequestParams = {},
-  ) =>
-    this.request<DropsDropsSearchData, any>({
-      path: `/drops/drops/search/`,
+  dropsSearch = (query: DropsSearchParams, params: RequestParams = {}) =>
+    this.request<DropsSearchData, any>({
+      path: `/drops/search/`,
       method: "GET",
       query: query,
       secure: true,
@@ -268,19 +265,16 @@ export class Drops<
    * @description 특정 drop의 상세 정보를 조회합니다.
    *
    * @tags drops
-   * @name DropsDropsRead
+   * @name DropsRead
    * @summary Drop 상세 조회
-   * @request GET:/drops/drops/{id}/
+   * @request GET:/drops/{id}/
    * @secure
-   * @response `200` `DropsDropsReadData`
+   * @response `200` `DropsReadData`
    * @response `404` `void` Drop not found
    */
-  dropsDropsRead = (
-    { id, ...query }: DropsDropsReadParams,
-    params: RequestParams = {},
-  ) =>
-    this.request<DropsDropsReadData, void>({
-      path: `/drops/drops/${id}/`,
+  dropsRead = ({ id, ...query }: DropsReadParams, params: RequestParams = {}) =>
+    this.request<DropsReadData, void>({
+      path: `/drops/${id}/`,
       method: "GET",
       secure: true,
       format: "json",
@@ -290,21 +284,21 @@ export class Drops<
    * @description 기존 drop을 수정합니다. 태그도 업데이트할 수 있습니다.
    *
    * @tags drops
-   * @name DropsDropsUpdate
+   * @name DropsUpdate
    * @summary Drop 수정
-   * @request PUT:/drops/drops/{id}/
+   * @request PUT:/drops/{id}/
    * @secure
-   * @response `200` `DropsDropsUpdateData`
+   * @response `200` `DropsUpdateData`
    * @response `400` `void` Bad request
    * @response `404` `void` Drop not found
    */
-  dropsDropsUpdate = (
-    { id, ...query }: DropsDropsUpdateParams,
+  dropsUpdate = (
+    { id, ...query }: DropsUpdateParams,
     data: DropUpdate,
     params: RequestParams = {},
   ) =>
-    this.request<DropsDropsUpdateData, void>({
-      path: `/drops/drops/${id}/`,
+    this.request<DropsUpdateData, void>({
+      path: `/drops/${id}/`,
       method: "PUT",
       body: data,
       secure: true,
@@ -316,19 +310,19 @@ export class Drops<
    * @description drop을 soft delete합니다.
    *
    * @tags drops
-   * @name DropsDropsDelete
+   * @name DropsDelete
    * @summary Drop 삭제
-   * @request DELETE:/drops/drops/{id}/
+   * @request DELETE:/drops/{id}/
    * @secure
-   * @response `204` `DropsDropsDeleteData` Deleted successfully
+   * @response `204` `DropsDeleteData` Deleted successfully
    * @response `404` `void` Drop not found
    */
-  dropsDropsDelete = (
-    { id, ...query }: DropsDropsDeleteParams,
+  dropsDelete = (
+    { id, ...query }: DropsDeleteParams,
     params: RequestParams = {},
   ) =>
-    this.request<DropsDropsDeleteData, void>({
-      path: `/drops/drops/${id}/`,
+    this.request<DropsDeleteData, void>({
+      path: `/drops/${id}/`,
       method: "DELETE",
       secure: true,
       ...params,

@@ -157,6 +157,73 @@ export interface DeckUpdate {
   is_public?: boolean;
 }
 
+export interface Drop {
+  /**
+   * Id
+   * @format uuid
+   */
+  id?: string;
+  /**
+   * Title
+   * @minLength 1
+   * @maxLength 255
+   */
+  title: string;
+  /** Content */
+  content?: string | null;
+  /**
+   * Url
+   * @format uri
+   * @minLength 1
+   * @maxLength 200
+   */
+  url: string;
+  /** Memo */
+  memo?: string | null;
+  /**
+   * Deck
+   * @format uuid
+   */
+  deck: string;
+  /** Tags */
+  tags?: string;
+  /**
+   * Created at
+   * @format date-time
+   */
+  created_at?: string;
+  /**
+   * Updated at
+   * @format date-time
+   */
+  updated_at?: string;
+}
+
+export interface DropCreate {
+  /**
+   * Title
+   * @minLength 1
+   * @maxLength 255
+   */
+  title: string;
+  /** Content */
+  content?: string | null;
+  /**
+   * Url
+   * @format uri
+   * @minLength 1
+   */
+  url: string;
+  /** Memo */
+  memo?: string | null;
+  /**
+   * Deck
+   * @format uuid
+   */
+  deck: string;
+  tags?: string[];
+}
+
 export interface Comment {
   /**
    * Id
@@ -261,73 +328,6 @@ export interface CommentUpdate {
   content: string;
 }
 
-export interface Drop {
-  /**
-   * Id
-   * @format uuid
-   */
-  id?: string;
-  /**
-   * Title
-   * @minLength 1
-   * @maxLength 255
-   */
-  title: string;
-  /** Content */
-  content?: string | null;
-  /**
-   * Url
-   * @format uri
-   * @minLength 1
-   * @maxLength 200
-   */
-  url: string;
-  /** Memo */
-  memo?: string | null;
-  /**
-   * Deck
-   * @format uuid
-   */
-  deck: string;
-  /** Tags */
-  tags?: string;
-  /**
-   * Created at
-   * @format date-time
-   */
-  created_at?: string;
-  /**
-   * Updated at
-   * @format date-time
-   */
-  updated_at?: string;
-}
-
-export interface DropCreate {
-  /**
-   * Title
-   * @minLength 1
-   * @maxLength 255
-   */
-  title: string;
-  /** Content */
-  content?: string | null;
-  /**
-   * Url
-   * @format uri
-   * @minLength 1
-   */
-  url: string;
-  /** Memo */
-  memo?: string | null;
-  /**
-   * Deck
-   * @format uuid
-   */
-  deck: string;
-  tags?: string[];
-}
-
 export interface DropUpdate {
   /**
    * Title
@@ -351,6 +351,39 @@ export interface DropUpdate {
    */
   deck?: string;
   tags?: string[];
+}
+
+/** 통계 정보 */
+export interface DashboardOverview {
+  /**
+   * Deck count
+   * 전체 deck 개수
+   */
+  deck_count: number;
+  /**
+   * Drop count
+   * 전체 drop 개수
+   */
+  drop_count: number;
+  /**
+   * Public deck count
+   * 공개 deck 개수
+   */
+  public_deck_count: number;
+  /**
+   * Tag count
+   * 사용한 고유 tag 개수
+   */
+  tag_count: number;
+}
+
+export interface Dashboard {
+  /** 통계 정보 */
+  overview: DashboardOverview;
+  /** 최근 drop 10개 */
+  recent_drops: Drop[];
+  /** 최근 조회한 deck 5개 */
+  frequent_decks: Deck[];
 }
 
 export interface User {
@@ -476,7 +509,7 @@ export interface SocialLoginRequest {
   id_token?: string;
 }
 
-export interface DecksDecksListParams {
+export interface DecksListParams {
   /**
    * Parent deck ID (optional)
    * @format uuid
@@ -484,11 +517,11 @@ export interface DecksDecksListParams {
   parent?: string;
 }
 
-export type DecksDecksListData = Deck[];
+export type DecksListData = Deck[];
 
-export type DecksDecksCreateData = Deck;
+export type DecksCreateData = Deck;
 
-export interface DecksDecksTreeParams {
+export interface DecksTreeParams {
   /**
    * Root deck ID (optional, 없으면 최상위부터)
    * @format uuid
@@ -496,25 +529,37 @@ export interface DecksDecksTreeParams {
   deck_id?: string;
 }
 
-export type DecksDecksTreeData = DeckTree[];
+export type DecksTreeData = DeckTree[];
 
-export interface DecksDecksReadParams {
+export interface DecksReadParams {
   id: string;
 }
 
-export type DecksDecksReadData = Deck;
+export type DecksReadData = Deck;
 
-export interface DecksDecksUpdateParams {
+export interface DecksUpdateParams {
   id: string;
 }
 
-export type DecksDecksUpdateData = Deck;
+export type DecksUpdateData = Deck;
 
-export interface DecksDecksDeleteParams {
+export interface DecksDeleteParams {
   id: string;
 }
 
-export type DecksDecksDeleteData = any;
+export type DecksDeleteData = any;
+
+export interface DropsListParams {
+  /**
+   * Deck ID (required)
+   * @format uuid
+   */
+  deck_id: string;
+}
+
+export type DropsListData = Drop[];
+
+export type DropsCreateData = Drop;
 
 export interface DropsCommentsListParams {
   /**
@@ -562,48 +607,48 @@ export interface DropsCommentsRepliesParams {
 
 export type DropsCommentsRepliesData = Comment[];
 
-export interface DropsDropsListParams {
-  /**
-   * Deck ID (required)
-   * @format uuid
-   */
-  deck_id: string;
-}
-
-export type DropsDropsListData = Drop[];
-
-export type DropsDropsCreateData = Drop;
-
-export interface DropsDropsSearchParams {
+export interface DropsSearchParams {
   /** Search query */
   query?: string;
   /** Tag names (comma-separated) */
   tags?: string;
 }
 
-export type DropsDropsSearchData = Drop[];
+export type DropsSearchData = Drop[];
 
-export interface DropsDropsReadParams {
+export interface DropsReadParams {
   id: string;
 }
 
-export type DropsDropsReadData = Drop;
+export type DropsReadData = Drop;
 
-export interface DropsDropsUpdateParams {
+export interface DropsUpdateParams {
   id: string;
 }
 
-export type DropsDropsUpdateData = Drop;
+export type DropsUpdateData = Drop;
 
-export interface DropsDropsDeleteParams {
+export interface DropsDeleteParams {
   id: string;
 }
 
-export type DropsDropsDeleteData = any;
+export type DropsDeleteData = any;
+
+export type UsersProfileDashboardData = Dashboard;
 
 export type UsersProfileMeData = User;
 
 export type UsersProfileMeUpdateMeData = User;
+
+export interface UsersProfileRecentDropsParams {
+  /**
+   * 조회할 drop 개수 (기본값: 10)
+   * @default 10
+   */
+  limit?: number;
+}
+
+export type UsersProfileRecentDropsData = Drop[];
 
 export type UsersRefreshData = Token;
 

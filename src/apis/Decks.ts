@@ -12,17 +12,17 @@
 
 import {
   DeckCreate,
-  DecksDecksCreateData,
-  DecksDecksDeleteData,
-  DecksDecksDeleteParams,
-  DecksDecksListData,
-  DecksDecksListParams,
-  DecksDecksReadData,
-  DecksDecksReadParams,
-  DecksDecksTreeData,
-  DecksDecksTreeParams,
-  DecksDecksUpdateData,
-  DecksDecksUpdateParams,
+  DecksCreateData,
+  DecksDeleteData,
+  DecksDeleteParams,
+  DecksListData,
+  DecksListParams,
+  DecksReadData,
+  DecksReadParams,
+  DecksTreeData,
+  DecksTreeParams,
+  DecksUpdateData,
+  DecksUpdateParams,
   DeckUpdate,
 } from "./data-contracts";
 import { ContentType, HttpClient, RequestParams } from "./http-client";
@@ -34,15 +34,15 @@ export class Decks<
    * @description 사용자의 deck 목록을 조회합니다. parent 파라미터로 특정 deck의 children만 조회 가능합니다.
    *
    * @tags decks
-   * @name DecksDecksList
+   * @name DecksList
    * @summary Deck 목록 조회
-   * @request GET:/decks/decks/
+   * @request GET:/decks/
    * @secure
-   * @response `200` `DecksDecksListData`
+   * @response `200` `DecksListData`
    */
-  decksDecksList = (query: DecksDecksListParams, params: RequestParams = {}) =>
-    this.request<DecksDecksListData, any>({
-      path: `/decks/decks/`,
+  decksList = (query: DecksListParams, params: RequestParams = {}) =>
+    this.request<DecksListData, any>({
+      path: `/decks/`,
       method: "GET",
       query: query,
       secure: true,
@@ -53,16 +53,16 @@ export class Decks<
    * @description 새로운 deck을 생성합니다.
    *
    * @tags decks
-   * @name DecksDecksCreate
+   * @name DecksCreate
    * @summary Deck 생성
-   * @request POST:/decks/decks/
+   * @request POST:/decks/
    * @secure
-   * @response `201` `DecksDecksCreateData`
+   * @response `201` `DecksCreateData`
    * @response `400` `void` Bad request
    */
-  decksDecksCreate = (data: DeckCreate, params: RequestParams = {}) =>
-    this.request<DecksDecksCreateData, void>({
-      path: `/decks/decks/`,
+  decksCreate = (data: DeckCreate, params: RequestParams = {}) =>
+    this.request<DecksCreateData, void>({
+      path: `/decks/`,
       method: "POST",
       body: data,
       secure: true,
@@ -74,15 +74,15 @@ export class Decks<
    * @description Deck의 전체 트리 구조를 재귀적으로 조회합니다.
    *
    * @tags decks
-   * @name DecksDecksTree
+   * @name DecksTree
    * @summary Deck 트리 조회
-   * @request GET:/decks/decks/tree/
+   * @request GET:/decks/tree/
    * @secure
-   * @response `200` `DecksDecksTreeData`
+   * @response `200` `DecksTreeData`
    */
-  decksDecksTree = (query: DecksDecksTreeParams, params: RequestParams = {}) =>
-    this.request<DecksDecksTreeData, any>({
-      path: `/decks/decks/tree/`,
+  decksTree = (query: DecksTreeParams, params: RequestParams = {}) =>
+    this.request<DecksTreeData, any>({
+      path: `/decks/tree/`,
       method: "GET",
       query: query,
       secure: true,
@@ -93,19 +93,16 @@ export class Decks<
    * @description 특정 deck의 상세 정보를 조회합니다.
    *
    * @tags decks
-   * @name DecksDecksRead
+   * @name DecksRead
    * @summary Deck 상세 조회
-   * @request GET:/decks/decks/{id}/
+   * @request GET:/decks/{id}/
    * @secure
-   * @response `200` `DecksDecksReadData`
+   * @response `200` `DecksReadData`
    * @response `404` `void` Deck not found
    */
-  decksDecksRead = (
-    { id, ...query }: DecksDecksReadParams,
-    params: RequestParams = {},
-  ) =>
-    this.request<DecksDecksReadData, void>({
-      path: `/decks/decks/${id}/`,
+  decksRead = ({ id, ...query }: DecksReadParams, params: RequestParams = {}) =>
+    this.request<DecksReadData, void>({
+      path: `/decks/${id}/`,
       method: "GET",
       secure: true,
       format: "json",
@@ -115,21 +112,21 @@ export class Decks<
    * @description 기존 deck을 수정합니다.
    *
    * @tags decks
-   * @name DecksDecksUpdate
+   * @name DecksUpdate
    * @summary Deck 수정
-   * @request PUT:/decks/decks/{id}/
+   * @request PUT:/decks/{id}/
    * @secure
-   * @response `200` `DecksDecksUpdateData`
+   * @response `200` `DecksUpdateData`
    * @response `400` `void` Bad request
    * @response `404` `void` Deck not found
    */
-  decksDecksUpdate = (
-    { id, ...query }: DecksDecksUpdateParams,
+  decksUpdate = (
+    { id, ...query }: DecksUpdateParams,
     data: DeckUpdate,
     params: RequestParams = {},
   ) =>
-    this.request<DecksDecksUpdateData, void>({
-      path: `/decks/decks/${id}/`,
+    this.request<DecksUpdateData, void>({
+      path: `/decks/${id}/`,
       method: "PUT",
       body: data,
       secure: true,
@@ -141,19 +138,19 @@ export class Decks<
    * @description deck을 soft delete합니다. 하위 children도 함께 삭제됩니다.
    *
    * @tags decks
-   * @name DecksDecksDelete
+   * @name DecksDelete
    * @summary Deck 삭제
-   * @request DELETE:/decks/decks/{id}/
+   * @request DELETE:/decks/{id}/
    * @secure
-   * @response `204` `DecksDecksDeleteData` Deleted successfully
+   * @response `204` `DecksDeleteData` Deleted successfully
    * @response `404` `void` Deck not found
    */
-  decksDecksDelete = (
-    { id, ...query }: DecksDecksDeleteParams,
+  decksDelete = (
+    { id, ...query }: DecksDeleteParams,
     params: RequestParams = {},
   ) =>
-    this.request<DecksDecksDeleteData, void>({
-      path: `/decks/decks/${id}/`,
+    this.request<DecksDeleteData, void>({
+      path: `/decks/${id}/`,
       method: "DELETE",
       secure: true,
       ...params,

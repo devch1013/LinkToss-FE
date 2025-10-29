@@ -1,14 +1,15 @@
 'use client';
 
+import type { DeckTree } from '@/apis/data-contracts';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { mockDeckApi } from '@/lib/mock-api';
+import { decksApi } from '@/lib/api-client';
 import { cn } from '@/lib/utils';
-import type { Deck } from '@/types';
 import {
-  Crown,
-  Edit,
+  ChevronDown,
+  ChevronRight,
+  Folder,
   Globe,
   Plus,
   Star,
@@ -17,27 +18,27 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import { CreateDeckModal } from './CreateDeckModal';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [decks, setDecks] = useState<Deck[]>([]);
-  const [sharedDecks, setSharedDecks] = useState<Deck[]>([]);
+  const [deckTree, setDeckTree] = useState<DeckTree[]>([]);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [sidebarWidth, setSidebarWidth] = useState(256);
   const [isResizing, setIsResizing] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
 
+  const loadDecks = async () => {
+    try {
+      const response = await decksApi.decksTree({});
+      setDeckTree(response.data);
+    } catch (error) {
+      console.error('Failed to load deck tree:', error);
+    }
+  };
+
   useEffect(() => {
-    const loadDecks = async () => {
-      const decks = await mockDeckApi.getDecks();
-
-      // 내 Deck과 공유받은 Deck 분리
-      const myDecks = decks.filter(r => r.role === 'owner' && !r.parentId);
-      const shared = decks.filter(r => r.role === 'editor' && !r.parentId);
-
-      setDecks(myDecks);
-      setSharedDecks(shared);
-    };
-
     loadDecks();
   }, []);
 
@@ -70,47 +71,69 @@ export function Sidebar() {
     };
   }, [isResizing]);
 
-  const renderDeck = (deck: Deck) => {
+  const toggleExpand = (deckId: string) => {
+    setExpandedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(deckId)) {
+        newSet.delete(deckId);
+      } else {
+        newSet.add(deckId);
+      }
+      return newSet;
+    });
+  };
+
+  const renderDeck = (deck: DeckTree, depth: number = 0) => {
     const isActive = pathname === `/deck/${deck.id}`;
+    const children = (deck.children as unknown as DeckTree[]) || [];
+    const hasChildren = Array.isArray(children) && children.length > 0;
+    const isExpanded = expandedIds.has(deck.id || '');
+    const deckColor = deck.color_hex || '#6B7280';
 
     return (
       <div key={deck.id} className="space-y-1">
-        <Link href={`/deck/${deck.id}`}>
-          <div
-            className={cn(
-              'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
-              isActive
-                ? 'bg-primary text-primary-foreground'
-                : 'hover:bg-accent hover:text-accent-foreground'
-            )}
-          >
-            <span className="text-lg">{deck.icon}</span>
-            <span className="flex-1 truncate">{deck.name}</span>
-            {deck.role === 'owner' && <Crown className="h-3 w-3" />}
-            {deck.role === 'editor' && <Edit className="h-3 w-3" />}
-            <span className="text-xs text-muted-foreground">{deck.dropCount}</span>
-          </div>
-        </Link>
+        <div
+          className={cn(
+            'flex items-center gap-1 rounded-md px-2 py-1.5 text-sm transition-colors',
+            isActive
+              ? 'bg-primary text-primary-foreground'
+              : 'hover:bg-accent hover:text-accent-foreground'
+          )}
+          style={{ paddingLeft: `${depth * 12 + 8}px` }}
+        >
+          {hasChildren && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                toggleExpand(deck.id || '');
+              }}
+              className="p-0.5 hover:bg-accent/50 rounded"
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-3 w-3" />
+              ) : (
+                <ChevronRight className="h-3 w-3" />
+              )}
+            </button>
+          )}
+          {!hasChildren && <div className="w-4" />}
 
-        {/* Sub-decks */}
-        {deck.subDecks && deck.subDecks.length > 0 && (
-          <div className="ml-6 space-y-1">
-            {deck.subDecks.map((subDeck) => (
-              <Link key={subDeck.id} href={`/deck/${subDeck.id}`}>
-                <div
-                  className={cn(
-                    'flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors',
-                    pathname === `/deck/${subDeck.id}`
-                      ? 'bg-primary/10 text-primary'
-                      : 'hover:bg-accent'
-                  )}
-                >
-                  <span>{subDeck.icon}</span>
-                  <span className="flex-1 truncate">{subDeck.name}</span>
-                  <span className="text-xs text-muted-foreground">{subDeck.dropCount}</span>
-                </div>
-              </Link>
-            ))}
+          <Folder
+            className="h-4 w-4 flex-shrink-0"
+            style={{ color: deckColor }}
+            fill={deckColor}
+            fillOpacity={0.2}
+          />
+
+          <Link href={`/deck/${deck.id}`} className="flex-1 truncate min-w-0">
+            <span className="truncate">{deck.name}</span>
+          </Link>
+        </div>
+
+        {/* Children */}
+        {hasChildren && isExpanded && (
+          <div className="space-y-1">
+            {children.map((child) => renderDeck(child, depth + 1))}
           </div>
         )}
       </div>
@@ -126,7 +149,11 @@ export function Sidebar() {
       <div className="flex h-full flex-col">
         {/* New Deck Button */}
         <div className="p-4">
-          <Button className="w-full" size="sm">
+          <Button
+            className="w-full"
+            size="sm"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
             <Plus className="mr-2 h-4 w-4" />
             새 Deck
           </Button>
@@ -136,28 +163,8 @@ export function Sidebar() {
 
         {/* Deck List */}
         <ScrollArea className="flex-1 px-3">
-          <div className="space-y-4 py-4">
-            {/* My Decks */}
-            <div>
-              <h3 className="mb-2 px-3 text-xs font-semibold text-muted-foreground">
-                📁 My Decks
-              </h3>
-              <div className="space-y-1">
-                {decks.map((deck) => renderDeck(deck))}
-              </div>
-            </div>
-
-            {/* Shared with Me */}
-            {sharedDecks.length > 0 && (
-              <div>
-                <h3 className="mb-2 px-3 text-xs font-semibold text-muted-foreground">
-                  🤝 Shared with Me
-                </h3>
-                <div className="space-y-1">
-                  {sharedDecks.map((deck) => renderDeck(deck))}
-                </div>
-              </div>
-            )}
+          <div className="space-y-1 py-4">
+            {deckTree.map((deck) => renderDeck(deck, 0))}
           </div>
         </ScrollArea>
 
@@ -190,6 +197,15 @@ export function Sidebar() {
       <div
         className="absolute right-0 top-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-primary/20 transition-colors"
         onMouseDown={() => setIsResizing(true)}
+      />
+
+      {/* Create Deck Modal */}
+      <CreateDeckModal
+        open={isCreateModalOpen}
+        onOpenChange={setIsCreateModalOpen}
+        onSuccess={() => {
+          loadDecks();
+        }}
       />
     </aside>
   );

@@ -16,8 +16,11 @@ import {
   UserProfileUpdate,
   UsersLoginCreateData,
   UsersLoginCreateParams,
+  UsersProfileDashboardData,
   UsersProfileMeData,
   UsersProfileMeUpdateMeData,
+  UsersProfileRecentDropsData,
+  UsersProfileRecentDropsParams,
   UsersRefreshData,
   UsersWithdrawData,
 } from "./data-contracts";
@@ -26,6 +29,24 @@ import { ContentType, HttpClient, RequestParams } from "./http-client";
 export class Users<
   SecurityDataType = unknown,
 > extends HttpClient<SecurityDataType> {
+  /**
+   * @description 사용자의 대시보드 정보를 조회합니다. (통계, 최근 drop 10개, 최근 조회 deck 5개)
+   *
+   * @tags users
+   * @name UsersProfileDashboard
+   * @summary 대시보드 조회
+   * @request GET:/users/profile/dashboard/
+   * @secure
+   * @response `200` `UsersProfileDashboardData`
+   */
+  usersProfileDashboard = (params: RequestParams = {}) =>
+    this.request<UsersProfileDashboardData, any>({
+      path: `/users/profile/dashboard/`,
+      method: "GET",
+      secure: true,
+      format: "json",
+      ...params,
+    });
   /**
    * @description 현재 로그인한 사용자의 프로필 정보를 조회합니다.
    *
@@ -65,6 +86,28 @@ export class Users<
       body: data,
       secure: true,
       type: ContentType.Json,
+      format: "json",
+      ...params,
+    });
+  /**
+   * @description 사용자가 저장한 최근 drop들을 시간순으로 조회합니다.
+   *
+   * @tags users
+   * @name UsersProfileRecentDrops
+   * @summary 최근 Drop 조회
+   * @request GET:/users/profile/recent-drops/
+   * @secure
+   * @response `200` `UsersProfileRecentDropsData`
+   */
+  usersProfileRecentDrops = (
+    query: UsersProfileRecentDropsParams,
+    params: RequestParams = {},
+  ) =>
+    this.request<UsersProfileRecentDropsData, any>({
+      path: `/users/profile/recent-drops/`,
+      method: "GET",
+      query: query,
+      secure: true,
       format: "json",
       ...params,
     });
