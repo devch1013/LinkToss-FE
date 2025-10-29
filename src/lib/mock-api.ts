@@ -1,13 +1,13 @@
-import type { User, Repository, Document, Tag, RepositoryMember, Invitation, DashboardStats } from '@/types';
+import type { DashboardStats, Deck, DeckMember, Drop, Invitation, Tag, User } from '@/types';
 import {
-  mockCurrentUser,
-  mockUsers,
-  mockRepositories,
-  mockDocuments,
-  mockTags,
-  mockRepositoryMembers,
-  mockInvitations,
-  mockDashboardStats,
+    mockCurrentUser,
+    mockDashboardStats,
+    mockDeckMembers,
+    mockDecks,
+    mockDrops,
+    mockInvitations,
+    mockTags,
+    mockUsers,
 } from './mock-data';
 
 // Simulated API delay
@@ -52,40 +52,40 @@ export const mockAuthApi = {
   },
 };
 
-// Repository API
-export const mockRepositoryApi = {
-  async getRepositories(parentId?: string | null): Promise<Repository[]> {
+// Deck API
+export const mockDeckApi = {
+  async getDecks(parentId?: string | null): Promise<Deck[]> {
     await delay(200);
     if (parentId === undefined) {
-      // Get all repositories
-      return mockRepositories;
+      // Get all decks
+      return mockDecks;
     }
-    return mockRepositories.filter(r => r.parentId === parentId);
+    return mockDecks.filter(r => r.parentId === parentId);
   },
 
-  async getRepository(id: string): Promise<Repository | null> {
+  async getDeck(id: string): Promise<Deck | null> {
     await delay(200);
-    const repo = mockRepositories.find(r => r.id === id);
-    if (!repo) return null;
+    const deck = mockDecks.find(r => r.id === id);
+    if (!deck) return null;
 
-    // Add sub-repositories
-    const subRepos = mockRepositories.filter(r => r.parentId === id);
+    // Add sub-decks
+    const subDecks = mockDecks.filter(r => r.parentId === id);
     return {
-      ...repo,
-      subRepositories: subRepos,
+      ...deck,
+      subDecks: subDecks,
     };
   },
 
-  async createRepository(data: {
+  async createDeck(data: {
     name: string;
     description: string;
     icon: string;
     isPublic: boolean;
     parentId?: string | null;
-  }): Promise<Repository> {
+  }): Promise<Deck> {
     await delay(400);
-    const newRepo: Repository = {
-      id: `repo-${Date.now()}`,
+    const newDeck: Deck = {
+      id: `deck-${Date.now()}`,
       userId: mockCurrentUser.id,
       parentId: data.parentId || null,
       name: data.name,
@@ -93,51 +93,51 @@ export const mockRepositoryApi = {
       icon: data.icon,
       isPublic: data.isPublic,
       slug: data.name.toLowerCase().replace(/\s+/g, '-'),
-      position: mockRepositories.length,
-      documentCount: 0,
-      subRepositoryCount: 0,
+      position: mockDecks.length,
+      dropCount: 0,
+      subDeckCount: 0,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       role: 'owner',
     };
-    mockRepositories.push(newRepo);
-    return newRepo;
+    mockDecks.push(newDeck);
+    return newDeck;
   },
 
-  async updateRepository(id: string, data: Partial<Repository>): Promise<Repository> {
+  async updateDeck(id: string, data: Partial<Deck>): Promise<Deck> {
     await delay(300);
-    const index = mockRepositories.findIndex(r => r.id === id);
-    if (index === -1) throw new Error('Repository not found');
+    const index = mockDecks.findIndex(r => r.id === id);
+    if (index === -1) throw new Error('Deck not found');
 
-    mockRepositories[index] = {
-      ...mockRepositories[index],
+    mockDecks[index] = {
+      ...mockDecks[index],
       ...data,
       updatedAt: new Date().toISOString(),
     };
-    return mockRepositories[index];
+    return mockDecks[index];
   },
 
-  async deleteRepository(id: string): Promise<void> {
+  async deleteDeck(id: string): Promise<void> {
     await delay(300);
-    const index = mockRepositories.findIndex(r => r.id === id);
+    const index = mockDecks.findIndex(r => r.id === id);
     if (index !== -1) {
-      mockRepositories.splice(index, 1);
+      mockDecks.splice(index, 1);
     }
   },
 
-  async getMembers(repositoryId: string): Promise<RepositoryMember[]> {
+  async getMembers(deckId: string): Promise<DeckMember[]> {
     await delay(200);
-    return mockRepositoryMembers.filter(m => m.repositoryId === repositoryId);
+    return mockDeckMembers.filter(m => m.deckId === deckId);
   },
 
-  async inviteMember(repositoryId: string, email: string): Promise<RepositoryMember> {
+  async inviteMember(deckId: string, email: string): Promise<DeckMember> {
     await delay(400);
     const user = mockUsers.find(u => u.email === email);
     if (!user) throw new Error('User not found');
 
-    const newMember: RepositoryMember = {
+    const newMember: DeckMember = {
       id: `member-${Date.now()}`,
-      repositoryId,
+      deckId,
       userId: user.id,
       user,
       role: 'editor',
@@ -146,52 +146,52 @@ export const mockRepositoryApi = {
       acceptedAt: null,
       status: 'pending',
     };
-    mockRepositoryMembers.push(newMember);
+    mockDeckMembers.push(newMember);
     return newMember;
   },
 
-  async removeMember(repositoryId: string, userId: string): Promise<void> {
+  async removeMember(deckId: string, userId: string): Promise<void> {
     await delay(300);
-    const index = mockRepositoryMembers.findIndex(
-      m => m.repositoryId === repositoryId && m.userId === userId
+    const index = mockDeckMembers.findIndex(
+      m => m.deckId === deckId && m.userId === userId
     );
     if (index !== -1) {
-      mockRepositoryMembers.splice(index, 1);
+      mockDeckMembers.splice(index, 1);
     }
   },
 };
 
-// Document API
-export const mockDocumentApi = {
-  async getDocuments(repositoryId?: string): Promise<Document[]> {
+// Drop API
+export const mockDropApi = {
+  async getDrops(deckId?: string): Promise<Drop[]> {
     await delay(200);
-    if (!repositoryId) return mockDocuments;
-    return mockDocuments.filter(d => d.repositoryId === repositoryId);
+    if (!deckId) return mockDrops;
+    return mockDrops.filter(d => d.deckId === deckId);
   },
 
-  async getDocument(id: string): Promise<Document | null> {
+  async getDrop(id: string): Promise<Drop | null> {
     await delay(200);
-    const doc = mockDocuments.find(d => d.id === id);
-    if (!doc) return null;
+    const drop = mockDrops.find(d => d.id === id);
+    if (!drop) return null;
 
-    const repository = mockRepositories.find(r => r.id === doc.repositoryId);
+    const deck = mockDecks.find(r => r.id === drop.deckId);
     return {
-      ...doc,
-      repository,
+      ...drop,
+      deck,
     };
   },
 
-  async createDocument(data: {
-    repositoryId: string;
+  async createDrop(data: {
+    deckId: string;
     title: string;
     url: string;
     content: string;
     tags?: string[];
-  }): Promise<Document> {
+  }): Promise<Drop> {
     await delay(400);
-    const newDoc: Document = {
-      id: `doc-${Date.now()}`,
-      repositoryId: data.repositoryId,
+    const newDrop: Drop = {
+      id: `drop-${Date.now()}`,
+      deckId: data.deckId,
       userId: mockCurrentUser.id,
       title: data.title,
       url: data.url,
@@ -208,32 +208,32 @@ export const mockDocumentApi = {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    mockDocuments.push(newDoc);
-    return newDoc;
+    mockDrops.push(newDrop);
+    return newDrop;
   },
 
-  async updateDocument(id: string, data: Partial<Document>): Promise<Document> {
+  async updateDrop(id: string, data: Partial<Drop>): Promise<Drop> {
     await delay(300);
-    const index = mockDocuments.findIndex(d => d.id === id);
-    if (index === -1) throw new Error('Document not found');
+    const index = mockDrops.findIndex(d => d.id === id);
+    if (index === -1) throw new Error('Drop not found');
 
-    mockDocuments[index] = {
-      ...mockDocuments[index],
+    mockDrops[index] = {
+      ...mockDrops[index],
       ...data,
       updatedAt: new Date().toISOString(),
     };
-    return mockDocuments[index];
+    return mockDrops[index];
   },
 
-  async deleteDocument(id: string): Promise<void> {
+  async deleteDrop(id: string): Promise<void> {
     await delay(300);
-    const index = mockDocuments.findIndex(d => d.id === id);
+    const index = mockDrops.findIndex(d => d.id === id);
     if (index !== -1) {
-      mockDocuments.splice(index, 1);
+      mockDrops.splice(index, 1);
     }
   },
 
-  async fetchMetadata(url: string): Promise<Partial<Document['linkMetadata']>> {
+  async fetchMetadata(url: string): Promise<Partial<Drop['linkMetadata']>> {
     await delay(600);
     // Simulate fetching metadata
     return {
@@ -257,7 +257,7 @@ export const mockTagApi = {
       id: `tag-${Date.now()}`,
       name,
       color,
-      documentCount: 0,
+      dropCount: 0,
       createdAt: new Date().toISOString(),
     };
     mockTags.push(newTag);
@@ -277,10 +277,10 @@ export const mockInvitationApi = {
     const invitation = mockInvitations.find(i => i.id === id);
     if (invitation) {
       invitation.status = 'accepted';
-      // Add to repository members
-      const newMember: RepositoryMember = {
+      // Add to deck members
+      const newMember: DeckMember = {
         id: `member-${Date.now()}`,
-        repositoryId: invitation.repository.id,
+        deckId: invitation.deck.id,
         userId: mockCurrentUser.id,
         user: mockCurrentUser,
         role: invitation.role,
@@ -289,7 +289,7 @@ export const mockInvitationApi = {
         acceptedAt: new Date().toISOString(),
         status: 'accepted',
       };
-      mockRepositoryMembers.push(newMember);
+      mockDeckMembers.push(newMember);
     }
   },
 
@@ -312,20 +312,20 @@ export const mockStatsApi = {
 
 // Search API
 export const mockSearchApi = {
-  async search(query: string): Promise<{ repositories: Repository[]; documents: Document[] }> {
+  async search(query: string): Promise<{ decks: Deck[]; drops: Drop[] }> {
     await delay(400);
     const lowerQuery = query.toLowerCase();
 
-    const repositories = mockRepositories.filter(
+    const decks = mockDecks.filter(
       r => r.name.toLowerCase().includes(lowerQuery) ||
            r.description.toLowerCase().includes(lowerQuery)
     );
 
-    const documents = mockDocuments.filter(
+    const drops = mockDrops.filter(
       d => d.title.toLowerCase().includes(lowerQuery) ||
            d.content.toLowerCase().includes(lowerQuery)
     );
 
-    return { repositories, documents };
+    return { decks, drops };
   },
 };

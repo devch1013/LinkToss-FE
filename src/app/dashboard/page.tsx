@@ -1,17 +1,17 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { mockStatsApi, mockDocumentApi, mockRepositoryApi } from '@/lib/mock-api';
-import type { DashboardStats, Document, Repository } from '@/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { mockStatsApi } from '@/lib/mock-api';
+import type { DashboardStats, Deck, Drop } from '@/types';
+import { ExternalLink, FileText, FolderOpen, Globe, Tag } from 'lucide-react';
 import Link from 'next/link';
-import { FolderOpen, FileText, Globe, Tag, ExternalLink } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -66,11 +66,11 @@ export default function DashboardPage() {
               <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">총 Repository</CardTitle>
+                    <CardTitle className="text-sm font-medium">총 Deck</CardTitle>
                     <FolderOpen className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.repositoryCount}개</div>
+                    <div className="text-2xl font-bold">{stats.overview.deckCount}개</div>
                     <p className="text-xs text-muted-foreground">
                       체계적으로 관리 중
                     </p>
@@ -79,11 +79,11 @@ export default function DashboardPage() {
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">총 Document</CardTitle>
+                    <CardTitle className="text-sm font-medium">총 Drop</CardTitle>
                     <FileText className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.documentCount}개</div>
+                    <div className="text-2xl font-bold">{stats.overview.dropCount}개</div>
                     <p className="text-xs text-muted-foreground">
                       저장된 링크
                     </p>
@@ -92,11 +92,11 @@ export default function DashboardPage() {
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Public Repository</CardTitle>
+                    <CardTitle className="text-sm font-medium">Public Deck</CardTitle>
                     <Globe className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.publicRepositoryCount}개</div>
+                    <div className="text-2xl font-bold">{stats.overview.publicDeckCount}개</div>
                     <p className="text-xs text-muted-foreground">
                       공유 중
                     </p>
@@ -118,35 +118,35 @@ export default function DashboardPage() {
               </div>
             )}
 
-            {/* Recent Documents */}
+            {/* Recent Drops */}
             <div className="mb-8">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">📌 최근 저장한 Document</h2>
+                <h2 className="text-2xl font-semibold">📌 최근 저장한 Drop</h2>
                 <Button variant="ghost" asChild>
                   <Link href="/search">모두 보기</Link>
                 </Button>
               </div>
 
-              {stats && stats.recentDocuments.length > 0 ? (
+              {stats && stats.recentDrops.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {stats.recentDocuments.map((doc: Document) => (
-                    <Link key={doc.id} href={`/document/${doc.id}`}>
+                  {stats.recentDrops.map((drop: Drop) => (
+                    <Link key={drop.id} href={`/drop/${drop.id}`}>
                       <Card className="h-full transition-all hover:shadow-md">
                         <CardHeader>
-                          <CardTitle className="line-clamp-1 text-base">{doc.title}</CardTitle>
+                          <CardTitle className="line-clamp-1 text-base">{drop.title}</CardTitle>
                           <CardDescription className="flex items-center gap-1 text-xs">
                             <ExternalLink className="h-3 w-3" />
-                            <span className="truncate">{doc.url}</span>
+                            <span className="truncate">{drop.url}</span>
                           </CardDescription>
                         </CardHeader>
                         <CardContent>
-                          {doc.contentPreview && (
+                          {drop.contentPreview && (
                             <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
-                              {doc.contentPreview}
+                              {drop.contentPreview}
                             </p>
                           )}
                           <div className="flex flex-wrap gap-1">
-                            {doc.tags.slice(0, 3).map((tag) => (
+                            {drop.tags.slice(0, 3).map((tag) => (
                               <Badge key={tag.id} variant="secondary" className="text-xs">
                                 #{tag.name}
                               </Badge>
@@ -161,7 +161,7 @@ export default function DashboardPage() {
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <p className="mb-2 text-lg font-medium">아직 저장된 Document가 없습니다</p>
+                    <p className="mb-2 text-lg font-medium">아직 저장된 Drop이 없습니다</p>
                     <p className="mb-4 text-sm text-muted-foreground">
                       첫 링크를 저장해보세요!
                     </p>
@@ -170,23 +170,23 @@ export default function DashboardPage() {
               )}
             </div>
 
-            {/* Frequent Repositories */}
+            {/* Frequent Decks */}
             <div>
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">📁 자주 사용하는 Repository</h2>
+                <h2 className="text-2xl font-semibold">📁 자주 사용하는 Deck</h2>
               </div>
 
-              {stats && stats.frequentRepositories.length > 0 ? (
+              {stats && stats.frequentDecks.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                  {stats.frequentRepositories.map((repo: Repository) => (
-                    <Link key={repo.id} href={`/repository/${repo.id}`}>
+                  {stats.frequentDecks.map((deck: Deck) => (
+                    <Link key={deck.id} href={`/deck/${deck.id}`}>
                       <Card className="h-full transition-all hover:shadow-md">
                         <CardHeader>
                           <div className="flex items-center gap-2">
-                            <span className="text-2xl">{repo.icon}</span>
+                            <span className="text-2xl">{deck.icon}</span>
                             <div className="flex-1">
-                              <CardTitle className="line-clamp-1 text-base">{repo.name}</CardTitle>
-                              {repo.isPublic && (
+                              <CardTitle className="line-clamp-1 text-base">{deck.name}</CardTitle>
+                              {deck.isPublic && (
                                 <Badge variant="outline" className="mt-1 text-xs">
                                   🌍 Public
                                 </Badge>
@@ -195,15 +195,15 @@ export default function DashboardPage() {
                           </div>
                         </CardHeader>
                         <CardContent>
-                          {repo.description && (
+                          {deck.description && (
                             <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">
-                              {repo.description}
+                              {deck.description}
                             </p>
                           )}
                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span>{repo.documentCount} documents</span>
-                            {repo.subRepositoryCount > 0 && (
-                              <span>{repo.subRepositoryCount} sub-repos</span>
+                            <span>{deck.dropCount} drops</span>
+                            {deck.subDeckCount > 0 && (
+                              <span>{deck.subDeckCount} sub-decks</span>
                             )}
                           </div>
                         </CardContent>
@@ -215,7 +215,7 @@ export default function DashboardPage() {
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <p className="mb-2 text-lg font-medium">Repository를 만들어보세요</p>
+                    <p className="mb-2 text-lg font-medium">Deck을 만들어보세요</p>
                     <p className="mb-4 text-sm text-muted-foreground">
                       링크를 체계적으로 관리할 수 있습니다
                     </p>

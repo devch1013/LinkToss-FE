@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { mockRepositories } from '@/lib/mock-data';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { mockDecks } from '@/lib/mock-data';
+import { FileText, Globe } from 'lucide-react';
 import Link from 'next/link';
-import { Globe, Star, FileText } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function ExplorePage() {
   const router = useRouter();
@@ -32,7 +32,7 @@ export default function ExplorePage() {
     );
   }
 
-  const publicRepos = mockRepositories.filter(r => r.isPublic);
+  const publicDecks = mockDecks.filter(r => r.isPublic);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -42,39 +42,39 @@ export default function ExplorePage() {
         <main className="flex-1 overflow-auto">
           <div className="container py-8">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold">🌍 Public Repository 탐색</h1>
+              <h1 className="text-3xl font-bold">🌍 Public Deck 탐색</h1>
               <p className="mt-2 text-muted-foreground">
-                다른 사용자들이 공개한 Repository를 둘러보세요
+                다른 사용자들이 공개한 Deck을 둘러보세요
               </p>
             </div>
 
-            {/* Public Repositories */}
-            {publicRepos.length > 0 ? (
+            {/* Public Decks */}
+            {publicDecks.length > 0 ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {publicRepos.map((repo) => (
-                  <Link key={repo.id} href={`/repository/${repo.id}`}>
+                {publicDecks.map((deck) => (
+                  <Link key={deck.id} href={`/deck/${deck.id}`}>
                     <Card className="h-full transition-all hover:shadow-md">
                       <CardHeader>
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-2xl">{repo.icon}</span>
+                          <span className="text-2xl">{deck.icon}</span>
                           <Badge variant="outline" className="gap-1">
                             <Globe className="h-3 w-3" />
                             Public
                           </Badge>
                         </div>
-                        <CardTitle className="text-lg">{repo.name}</CardTitle>
-                        <CardDescription>{repo.description}</CardDescription>
+                        <CardTitle className="text-lg">{deck.name}</CardTitle>
+                        <CardDescription>{deck.description}</CardDescription>
                       </CardHeader>
                       <CardContent>
                         <div className="flex items-center justify-between text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <FileText className="h-4 w-4" />
-                            <span>{repo.documentCount} documents</span>
+                            <span>{deck.dropCount} drops</span>
                           </div>
-                          {repo.user && (
+                          {deck.user && (
                             <div className="flex items-center gap-1">
                               <span>by</span>
-                              <span className="font-medium">@{repo.user.username}</span>
+                              <span className="font-medium">@{deck.user.username}</span>
                             </div>
                           )}
                         </div>
@@ -87,9 +87,9 @@ export default function ExplorePage() {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Globe className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <p className="mb-2 text-lg font-medium">공개된 Repository가 없습니다</p>
+                  <p className="mb-2 text-lg font-medium">공개된 Deck이 없습니다</p>
                   <p className="text-sm text-muted-foreground">
-                    곧 멋진 Repository들이 공유될 예정입니다!
+                    곧 멋진 Deck들이 공유될 예정입니다!
                   </p>
                 </CardContent>
               </Card>

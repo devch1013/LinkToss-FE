@@ -1,25 +1,25 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/contexts/AuthContext';
 import { mockSearchApi } from '@/lib/mock-api';
-import type { Repository, Document } from '@/types';
+import type { Deck, Drop } from '@/types';
+import { ExternalLink, FileText, Search } from 'lucide-react';
 import Link from 'next/link';
-import { Search, Folder, FileText, ExternalLink } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function SearchPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading } = useAuth();
   const [query, setQuery] = useState(searchParams.get('q') || '');
-  const [repositories, setRepositories] = useState<Repository[]>([]);
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [decks, setDecks] = useState<Deck[]>([]);
+  const [drops, setDrops] = useState<Drop[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
@@ -31,16 +31,16 @@ export default function SearchPage() {
   useEffect(() => {
     const performSearch = async () => {
       if (query.trim().length < 2) {
-        setRepositories([]);
-        setDocuments([]);
+        setDecks([]);
+        setDrops([]);
         return;
       }
 
       setIsSearching(true);
       try {
         const results = await mockSearchApi.search(query);
-        setRepositories(results.repositories);
-        setDocuments(results.documents);
+        setDecks(results.decks);
+        setDrops(results.drops);
       } catch (error) {
         console.error('Search failed:', error);
       } finally {
@@ -76,7 +76,7 @@ export default function SearchPage() {
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Repository, Document 검색..."
+                placeholder="Deck, Drop 검색..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="h-12 pl-10 text-base"
@@ -96,28 +96,28 @@ export default function SearchPage() {
               </div>
             ) : (
               <>
-                {/* Repositories Results */}
-                {repositories.length > 0 && (
+                {/* Decks Results */}
+                {decks.length > 0 && (
                   <div className="mb-8">
                     <h2 className="mb-4 text-xl font-semibold">
-                      📂 Repositories ({repositories.length})
+                      📂 Decks ({decks.length})
                     </h2>
                     <div className="space-y-3">
-                      {repositories.map((repo) => (
-                        <Link key={repo.id} href={`/repository/${repo.id}`}>
+                      {decks.map((deck) => (
+                        <Link key={deck.id} href={`/deck/${deck.id}`}>
                           <Card className="transition-all hover:shadow-md">
                             <CardHeader>
                               <div className="flex items-center gap-3">
-                                <span className="text-2xl">{repo.icon}</span>
+                                <span className="text-2xl">{deck.icon}</span>
                                 <div className="flex-1">
-                                  <CardTitle className="text-base">{repo.name}</CardTitle>
-                                  <CardDescription>{repo.description}</CardDescription>
+                                  <CardTitle className="text-base">{deck.name}</CardTitle>
+                                  <CardDescription>{deck.description}</CardDescription>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  {repo.isPublic && (
+                                  {deck.isPublic && (
                                     <Badge variant="outline">🌍 Public</Badge>
                                   )}
-                                  <Badge variant="secondary">{repo.documentCount} docs</Badge>
+                                  <Badge variant="secondary">{deck.dropCount} drops</Badge>
                                 </div>
                               </div>
                             </CardHeader>
@@ -128,31 +128,31 @@ export default function SearchPage() {
                   </div>
                 )}
 
-                {/* Documents Results */}
-                {documents.length > 0 && (
+                {/* Drops Results */}
+                {drops.length > 0 && (
                   <div>
                     <h2 className="mb-4 text-xl font-semibold">
-                      📄 Documents ({documents.length})
+                      📄 Drops ({drops.length})
                     </h2>
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                      {documents.map((doc) => (
-                        <Link key={doc.id} href={`/document/${doc.id}`}>
+                      {drops.map((drop) => (
+                        <Link key={drop.id} href={`/drop/${drop.id}`}>
                           <Card className="h-full transition-all hover:shadow-md">
                             <CardHeader>
-                              <CardTitle className="line-clamp-1 text-base">{doc.title}</CardTitle>
+                              <CardTitle className="line-clamp-1 text-base">{drop.title}</CardTitle>
                               <CardDescription className="flex items-center gap-1 text-xs">
                                 <ExternalLink className="h-3 w-3" />
-                                <span className="truncate">{doc.url}</span>
+                                <span className="truncate">{drop.url}</span>
                               </CardDescription>
                             </CardHeader>
                             <CardContent>
-                              {doc.contentPreview && (
+                              {drop.contentPreview && (
                                 <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
-                                  {doc.contentPreview}
+                                  {drop.contentPreview}
                                 </p>
                               )}
                               <div className="flex flex-wrap gap-1">
-                                {doc.tags.slice(0, 3).map((tag) => (
+                                {drop.tags.slice(0, 3).map((tag) => (
                                   <Badge key={tag.id} variant="secondary" className="text-xs">
                                     #{tag.name}
                                   </Badge>
@@ -167,7 +167,7 @@ export default function SearchPage() {
                 )}
 
                 {/* No Results */}
-                {repositories.length === 0 && documents.length === 0 && (
+                {decks.length === 0 && drops.length === 0 && (
                   <div className="text-center py-12">
                     <FileText className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
                     <p className="text-lg font-medium">검색 결과가 없습니다</p>

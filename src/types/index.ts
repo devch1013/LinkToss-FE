@@ -10,8 +10,8 @@ export interface User {
   createdAt: string;
 }
 
-// Repository Types
-export interface Repository {
+// Deck Types
+export interface Deck {
   id: string;
   userId: string;
   parentId: string | null;
@@ -21,19 +21,19 @@ export interface Repository {
   isPublic: boolean;
   slug: string;
   position: number;
-  documentCount: number;
-  subRepositoryCount: number;
+  dropCount: number;
+  subDeckCount: number;
   createdAt: string;
   updatedAt: string;
   user?: User;
-  subRepositories?: Repository[];
+  subDecks?: Deck[];
   role?: 'owner' | 'editor'; // 현재 사용자의 역할
 }
 
-// Document Types
-export interface Document {
+// Drop Types
+export interface Drop {
   id: string;
-  repositoryId: string;
+  deckId: string;
   userId: string;
   title: string;
   url: string;
@@ -43,7 +43,7 @@ export interface Document {
   tags: Tag[];
   createdAt: string;
   updatedAt: string;
-  repository?: Repository;
+  deck?: Deck;
 }
 
 export interface LinkMetadata {
@@ -62,14 +62,14 @@ export interface Tag {
   id: string;
   name: string;
   color: string;
-  documentCount?: number;
+  dropCount?: number;
   createdAt?: string;
 }
 
 // Member Types
-export interface RepositoryMember {
+export interface DeckMember {
   id: string;
-  repositoryId: string;
+  deckId: string;
   userId: string;
   user: User;
   role: 'owner' | 'editor';
@@ -82,7 +82,7 @@ export interface RepositoryMember {
 // Invitation Types
 export interface Invitation {
   id: string;
-  repository: Repository;
+  deck: Deck;
   invitedBy: User;
   role: 'editor';
   invitedAt: string;
@@ -92,11 +92,11 @@ export interface Invitation {
 // Stats Types
 export interface DashboardStats {
   overview: {
-    repositoryCount: number;
-    documentCount: number;
-    publicRepositoryCount: number;
+    deckCount: number;
+    dropCount: number;
+    publicDeckCount: number;
     tagCount: number;
   };
-  recentDocuments: Document[];
-  frequentRepositories: Repository[];
+  recentDrops: Drop[];
+  frequentDecks: Deck[];
 }

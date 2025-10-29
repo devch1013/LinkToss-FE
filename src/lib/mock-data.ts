@@ -1,4 +1,4 @@
-import type { DashboardStats, Document, Invitation, Repository, RepositoryMember, Tag, User } from '@/types';
+import type { DashboardStats, Deck, DeckMember, Drop, Invitation, Tag, User } from '@/types';
 
 // Mock Current User
 export const mockCurrentUser: User = {
@@ -39,19 +39,19 @@ export const mockUsers: User[] = [
 
 // Mock Tags
 export const mockTags: Tag[] = [
-  { id: 'tag-1', name: 'react', color: '#61DAFB', documentCount: 12 },
-  { id: 'tag-2', name: 'nextjs', color: '#000000', documentCount: 8 },
-  { id: 'tag-3', name: 'typescript', color: '#3178C6', documentCount: 15 },
-  { id: 'tag-4', name: 'design', color: '#FF6B6B', documentCount: 6 },
-  { id: 'tag-5', name: 'ui-ux', color: '#4ECDC4', documentCount: 9 },
-  { id: 'tag-6', name: 'tutorial', color: '#95E1D3', documentCount: 20 },
-  { id: 'tag-7', name: 'documentation', color: '#F38181', documentCount: 14 },
+  { id: 'tag-1', name: 'react', color: '#61DAFB', dropCount: 12 },
+  { id: 'tag-2', name: 'nextjs', color: '#000000', dropCount: 8 },
+  { id: 'tag-3', name: 'typescript', color: '#3178C6', dropCount: 15 },
+  { id: 'tag-4', name: 'design', color: '#FF6B6B', dropCount: 6 },
+  { id: 'tag-5', name: 'ui-ux', color: '#4ECDC4', dropCount: 9 },
+  { id: 'tag-6', name: 'tutorial', color: '#95E1D3', dropCount: 20 },
+  { id: 'tag-7', name: 'documentation', color: '#F38181', dropCount: 14 },
 ];
 
-// Mock Repositories
-export const mockRepositories: Repository[] = [
+// Mock Decks
+export const mockDecks: Deck[] = [
   {
-    id: 'repo-1',
+    id: 'deck-1',
     userId: mockCurrentUser.id,
     parentId: null,
     name: '개발 자료',
@@ -60,46 +60,46 @@ export const mockRepositories: Repository[] = [
     isPublic: false,
     slug: 'dev-resources',
     position: 0,
-    documentCount: 24,
-    subRepositoryCount: 2,
+    dropCount: 24,
+    subDeckCount: 2,
     createdAt: '2025-01-05T10:00:00Z',
     updatedAt: '2025-10-10T15:30:00Z',
     role: 'owner',
   },
   {
-    id: 'repo-2',
+    id: 'deck-2',
     userId: mockCurrentUser.id,
-    parentId: 'repo-1',
+    parentId: 'deck-1',
     name: 'React',
     description: 'React 학습 자료 및 참고 문서',
     icon: '⚛️',
     isPublic: false,
     slug: 'react',
     position: 0,
-    documentCount: 12,
-    subRepositoryCount: 0,
+    dropCount: 12,
+    subDeckCount: 0,
     createdAt: '2025-01-10T10:00:00Z',
     updatedAt: '2025-10-09T14:00:00Z',
     role: 'owner',
   },
   {
-    id: 'repo-3',
+    id: 'deck-3',
     userId: mockCurrentUser.id,
-    parentId: 'repo-1',
+    parentId: 'deck-1',
     name: 'TypeScript',
     description: 'TypeScript 관련 자료',
     icon: '📘',
     isPublic: false,
     slug: 'typescript',
     position: 1,
-    documentCount: 8,
-    subRepositoryCount: 0,
+    dropCount: 8,
+    subDeckCount: 0,
     createdAt: '2025-01-12T10:00:00Z',
     updatedAt: '2025-10-08T11:00:00Z',
     role: 'owner',
   },
   {
-    id: 'repo-4',
+    id: 'deck-4',
     userId: mockCurrentUser.id,
     parentId: null,
     name: '디자인 레퍼런스',
@@ -108,14 +108,14 @@ export const mockRepositories: Repository[] = [
     isPublic: true,
     slug: 'design-references',
     position: 1,
-    documentCount: 18,
-    subRepositoryCount: 0,
+    dropCount: 18,
+    subDeckCount: 0,
     createdAt: '2025-02-01T10:00:00Z',
     updatedAt: '2025-10-07T16:20:00Z',
     role: 'owner',
   },
   {
-    id: 'repo-5',
+    id: 'deck-5',
     userId: mockUsers[1].id,
     parentId: null,
     name: '팀 프로젝트',
@@ -124,15 +124,15 @@ export const mockRepositories: Repository[] = [
     isPublic: false,
     slug: 'team-project',
     position: 0,
-    documentCount: 15,
-    subRepositoryCount: 1,
+    dropCount: 15,
+    subDeckCount: 1,
     createdAt: '2025-03-01T10:00:00Z',
     updatedAt: '2025-10-10T09:00:00Z',
     role: 'editor',
     user: mockUsers[1],
   },
   {
-    id: 'repo-6',
+    id: 'deck-6',
     userId: mockCurrentUser.id,
     parentId: null,
     name: '북마크',
@@ -141,19 +141,19 @@ export const mockRepositories: Repository[] = [
     isPublic: false,
     slug: 'bookmarks',
     position: 2,
-    documentCount: 32,
-    subRepositoryCount: 0,
+    dropCount: 32,
+    subDeckCount: 0,
     createdAt: '2025-01-20T10:00:00Z',
     updatedAt: '2025-10-10T18:00:00Z',
     role: 'owner',
   },
 ];
 
-// Mock Documents
-export const mockDocuments: Document[] = [
+// Mock Drops
+export const mockDrops: Drop[] = [
   {
-    id: 'doc-1',
-    repositoryId: 'repo-2',
+    id: 'drop-1',
+    deckId: 'deck-2',
     userId: mockCurrentUser.id,
     title: 'React 공식 문서',
     url: 'https://react.dev',
@@ -173,8 +173,8 @@ export const mockDocuments: Document[] = [
     updatedAt: '2025-01-15T10:00:00Z',
   },
   {
-    id: 'doc-2',
-    repositoryId: 'repo-2',
+    id: 'drop-2',
+    deckId: 'deck-2',
     userId: mockCurrentUser.id,
     title: 'React Hooks 완벽 가이드',
     url: 'https://react.dev/reference/react',
@@ -190,8 +190,8 @@ export const mockDocuments: Document[] = [
     updatedAt: '2025-02-05T11:00:00Z',
   },
   {
-    id: 'doc-3',
-    repositoryId: 'repo-3',
+    id: 'drop-3',
+    deckId: 'deck-3',
     userId: mockCurrentUser.id,
     title: 'TypeScript Handbook',
     url: 'https://www.typescriptlang.org/docs/handbook/intro.html',
@@ -207,8 +207,8 @@ export const mockDocuments: Document[] = [
     updatedAt: '2025-01-20T09:00:00Z',
   },
   {
-    id: 'doc-4',
-    repositoryId: 'repo-4',
+    id: 'drop-4',
+    deckId: 'deck-4',
     userId: mockCurrentUser.id,
     title: 'Dribbble - 디자인 영감',
     url: 'https://dribbble.com',
@@ -224,8 +224,8 @@ export const mockDocuments: Document[] = [
     updatedAt: '2025-02-10T10:00:00Z',
   },
   {
-    id: 'doc-5',
-    repositoryId: 'repo-5',
+    id: 'drop-5',
+    deckId: 'deck-5',
     userId: mockUsers[1].id,
     title: 'Figma Design System',
     url: 'https://www.figma.com/design',
@@ -239,8 +239,8 @@ export const mockDocuments: Document[] = [
     updatedAt: '2025-03-05T10:00:00Z',
   },
   {
-    id: 'doc-6',
-    repositoryId: 'repo-1',
+    id: 'drop-6',
+    deckId: 'deck-1',
     userId: mockCurrentUser.id,
     title: 'Next.js 공식 문서',
     url: 'https://nextjs.org/docs',
@@ -256,11 +256,11 @@ export const mockDocuments: Document[] = [
   },
 ];
 
-// Mock Repository Members
-export const mockRepositoryMembers: RepositoryMember[] = [
+// Mock Deck Members
+export const mockDeckMembers: DeckMember[] = [
   {
     id: 'member-1',
-    repositoryId: 'repo-5',
+    deckId: 'deck-5',
     userId: mockUsers[1].id,
     user: mockUsers[1],
     role: 'owner',
@@ -271,7 +271,7 @@ export const mockRepositoryMembers: RepositoryMember[] = [
   },
   {
     id: 'member-2',
-    repositoryId: 'repo-5',
+    deckId: 'deck-5',
     userId: mockCurrentUser.id,
     user: mockCurrentUser,
     role: 'editor',
@@ -286,8 +286,8 @@ export const mockRepositoryMembers: RepositoryMember[] = [
 export const mockInvitations: Invitation[] = [
   {
     id: 'invite-1',
-    repository: {
-      id: 'repo-7',
+    deck: {
+      id: 'deck-7',
       userId: mockUsers[2].id,
       parentId: null,
       name: '디자인 시스템 레퍼런스',
@@ -296,8 +296,8 @@ export const mockInvitations: Invitation[] = [
       isPublic: false,
       slug: 'design-system-ref',
       position: 0,
-      documentCount: 25,
-      subRepositoryCount: 0,
+      dropCount: 25,
+      subDeckCount: 0,
       createdAt: '2025-09-01T10:00:00Z',
       updatedAt: '2025-10-05T10:00:00Z',
       user: mockUsers[2],
@@ -312,11 +312,11 @@ export const mockInvitations: Invitation[] = [
 // Mock Dashboard Stats
 export const mockDashboardStats: DashboardStats = {
   overview: {
-    repositoryCount: 5,
-    documentCount: 89,
-    publicRepositoryCount: 1,
+    deckCount: 5,
+    dropCount: 89,
+    publicDeckCount: 1,
     tagCount: 7,
   },
-  recentDocuments: mockDocuments.slice(0, 5),
-  frequentRepositories: mockRepositories.slice(0, 3),
+  recentDrops: mockDrops.slice(0, 5),
+  frequentDecks: mockDecks.slice(0, 3),
 };

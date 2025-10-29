@@ -1,0 +1,223 @@
+'use client';
+
+import { Header } from '@/components/layout/Header';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/contexts/AuthContext';
+import { mockDeckApi, mockDropApi } from '@/lib/mock-api';
+import type { Deck, Drop } from '@/types';
+import { ExternalLink, Folder, Plus, Search, Settings } from 'lucide-react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+export default function DeckDetailPage() {
+    const params = useParams();
+    const router = useRouter();
+    const { user, isLoading } = useAuth();
+    const [deck, setDeck] = useState<Deck | null>(null);
+    const [drops, setDrops] = useState<Drop[]>([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState('recent');
+
+    useEffect(() => {
+        if (!isLoading && !user) {
+            router.push('/login');
+        }
+    }, [user, isLoading, router]);
+
+    useEffect(() => {
+        const loadDeck = async () => {
+            if (params.id) {
+                const deck = await mockDeckApi.getDeck(params.id as string);
+                setDeck(deck);
+
+                const drops = await mockDropApi.getDrops(params.id as string);
+                setDrops(drops);
+            }
+        };
+
+        if (user && params.id) {
+            loadDeck();
+        }
+    }, [user, params.id]);
+
+    if (isLoading || !user || !deck) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <div className="text-2xl">🔗</div>
+                    <p className="mt-2 text-sm text-muted-foreground">로딩 중...</p>
+                </div>
+            </div>
+        );
+    }
+
+    const filteredDrops = drops.filter((drop) =>
+        drop.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        drop.content.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    return (
+        <div className="flex min-h-screen flex-col">
+            <Header />
+            <div className="flex flex-1">
+                <Sidebar />
+                <main className="flex-1 overflow-auto">
+                    <div className="container py-8">
+                        {/* Breadcrumb */}
+                        <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
+                            <Link href="/dashboard" className="hover:text-foreground">홈</Link>
+                            <span>/</span>
+                            <span className="text-foreground">{deck.name}</span>
+                        </div>
+
+                        {/* Deck Header */}
+                        <div className="mb-8 flex items-start justify-between">
+                            <div className="flex-1">
+                                <div className="flex items-center gap-3">
+                                    <span className="text-4xl">{deck.icon}</span>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <h1 className="text-3xl font-bold">{deck.name}</h1>
+                                            {deck.isPublic && (
+                                                <Badge variant="secondary" className="gap-1">
+                                                    🌍 Public
+                                                </Badge>
+                                            )}
+                                        </div>
+                                        {deck.description && (
+                                            <p className="mt-1 text-muted-foreground">{deck.description}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <Button variant="outline" size="icon" asChild>
+                                <Link href={`/deck/${deck.id}/settings`}>
+                                    <Settings className="h-4 w-4" />
+                                </Link>
+                            </Button>
+                        </div>
+
+                        {/* Action Bar */}
+                        <div className="mb-6 flex items-center gap-4">
+                            <div className="relative flex-1">
+                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input
+                                    placeholder="Drop 검색..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="pl-10"
+                                />
+                            </div>
+                            <Select value={sortBy} onValueChange={setSortBy}>
+                                <SelectTrigger className="w-[180px]">
+                                    <SelectValue placeholder="정렬" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="recent">최근 생성순</SelectItem>
+                                    <SelectItem value="title">제목순</SelectItem>
+                                    <SelectItem value="updated">최근 수정순</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <Button asChild>
+                                <Link href={`/deck/${deck.id}/new`}>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    새 Drop
+                                </Link>
+                            </Button>
+                            <Button variant="outline" asChild>
+                                <Link href={`/deck/${deck.id}/sub-deck`}>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Sub-deck
+                                </Link>
+                            </Button>
+                        </div>
+
+                        {/* Sub-decks */}
+                        {deck.subDecks && deck.subDecks.length > 0 && (
+                            <div className="mb-8">
+                                <h2 className="mb-4 text-xl font-semibold">📁 Sub-decks ({deck.subDecks.length})</h2>
+                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                    {deck.subDecks.map((subDeck) => (
+                                        <Link key={subDeck.id} href={`/deck/${subDeck.id}`}>
+                                            <Card className="transition-all hover:shadow-md">
+                                                <CardHeader>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-2xl">{subDeck.icon}</span>
+                                                        <CardTitle className="text-base">{subDeck.name}</CardTitle>
+                                                    </div>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <p className="text-sm text-muted-foreground">{subDeck.dropCount} drops</p>
+                                                </CardContent>
+                                            </Card>
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Drops */}
+                        <div>
+                            <h2 className="mb-4 text-xl font-semibold">📄 Drops ({filteredDrops.length})</h2>
+
+                            {filteredDrops.length > 0 ? (
+                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                    {filteredDrops.map((drop) => (
+                                        <Link key={drop.id} href={`/drop/${drop.id}`}>
+                                            <Card className="h-full transition-all hover:shadow-md">
+                                                <CardHeader>
+                                                    <CardTitle className="line-clamp-1 text-base">{drop.title}</CardTitle>
+                                                    <CardDescription className="flex items-center gap-1 text-xs">
+                                                        <ExternalLink className="h-3 w-3" />
+                                                        <span className="truncate">{drop.url}</span>
+                                                    </CardDescription>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    {drop.contentPreview && (
+                                                        <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
+                                                            {drop.contentPreview}
+                                                        </p>
+                                                    )}
+                                                    <div className="flex flex-wrap gap-1">
+                                                        {drop.tags.slice(0, 3).map((tag) => (
+                                                            <Badge key={tag.id} variant="secondary" className="text-xs">
+                                                                #{tag.name}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        </Link>
+                                    ))}
+                                </div>
+                            ) : (
+                                <Card>
+                                    <CardContent className="flex flex-col items-center justify-center py-12">
+                                        <Folder className="mb-4 h-12 w-12 text-muted-foreground" />
+                                        <p className="mb-2 text-lg font-medium">아직 저장된 Drop이 없습니다</p>
+                                        <p className="mb-4 text-sm text-muted-foreground">
+                                            첫 링크를 저장해보세요!
+                                        </p>
+                                        <Button asChild>
+                                            <Link href={`/deck/${deck.id}/new`}>
+                                                <Plus className="mr-2 h-4 w-4" />
+                                                새 Drop 추가
+                                            </Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    );
+}
+

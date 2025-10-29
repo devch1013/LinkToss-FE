@@ -1,51 +1,81 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { mockRepositoryApi } from '@/lib/mock-api';
-import type { Repository } from '@/types';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { mockDeckApi } from '@/lib/mock-api';
+import { cn } from '@/lib/utils';
+import type { Deck } from '@/types';
 import {
-  Plus,
-  Folder,
   Crown,
   Edit,
-  Search,
+  Globe,
+  Plus,
   Star,
-  Trash2,
-  Globe
+  Trash2
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [repositories, setRepositories] = useState<Repository[]>([]);
-  const [sharedRepos, setSharedRepos] = useState<Repository[]>([]);
+  const [decks, setDecks] = useState<Deck[]>([]);
+  const [sharedDecks, setSharedDecks] = useState<Deck[]>([]);
+  const [sidebarWidth, setSidebarWidth] = useState(256);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    const loadRepositories = async () => {
-      const repos = await mockRepositoryApi.getRepositories();
+    const loadDecks = async () => {
+      const decks = await mockDeckApi.getDecks();
 
-      // 내 Repository와 공유받은 Repository 분리
-      const myRepos = repos.filter(r => r.role === 'owner' && !r.parentId);
-      const shared = repos.filter(r => r.role === 'editor' && !r.parentId);
+      // 내 Deck과 공유받은 Deck 분리
+      const myDecks = decks.filter(r => r.role === 'owner' && !r.parentId);
+      const shared = decks.filter(r => r.role === 'editor' && !r.parentId);
 
-      setRepositories(myRepos);
-      setSharedRepos(shared);
+      setDecks(myDecks);
+      setSharedDecks(shared);
     };
 
-    loadRepositories();
+    loadDecks();
   }, []);
 
-  const renderRepository = (repo: Repository) => {
-    const isActive = pathname === `/repository/${repo.id}`;
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+
+      const newWidth = e.clientX;
+      if (newWidth >= 200 && newWidth <= 600) {
+        setSidebarWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing]);
+
+  const renderDeck = (deck: Deck) => {
+    const isActive = pathname === `/deck/${deck.id}`;
 
     return (
-      <div key={repo.id} className="space-y-1">
-        <Link href={`/repository/${repo.id}`}>
+      <div key={deck.id} className="space-y-1">
+        <Link href={`/deck/${deck.id}`}>
           <div
             className={cn(
               'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
@@ -54,30 +84,30 @@ export function Sidebar() {
                 : 'hover:bg-accent hover:text-accent-foreground'
             )}
           >
-            <span className="text-lg">{repo.icon}</span>
-            <span className="flex-1 truncate">{repo.name}</span>
-            {repo.role === 'owner' && <Crown className="h-3 w-3" />}
-            {repo.role === 'editor' && <Edit className="h-3 w-3" />}
-            <span className="text-xs text-muted-foreground">{repo.documentCount}</span>
+            <span className="text-lg">{deck.icon}</span>
+            <span className="flex-1 truncate">{deck.name}</span>
+            {deck.role === 'owner' && <Crown className="h-3 w-3" />}
+            {deck.role === 'editor' && <Edit className="h-3 w-3" />}
+            <span className="text-xs text-muted-foreground">{deck.dropCount}</span>
           </div>
         </Link>
 
-        {/* Sub-repositories */}
-        {repo.subRepositories && repo.subRepositories.length > 0 && (
+        {/* Sub-decks */}
+        {deck.subDecks && deck.subDecks.length > 0 && (
           <div className="ml-6 space-y-1">
-            {repo.subRepositories.map((subRepo) => (
-              <Link key={subRepo.id} href={`/repository/${subRepo.id}`}>
+            {deck.subDecks.map((subDeck) => (
+              <Link key={subDeck.id} href={`/deck/${subDeck.id}`}>
                 <div
                   className={cn(
                     'flex items-center gap-2 rounded-md px-3 py-1.5 text-sm transition-colors',
-                    pathname === `/repository/${subRepo.id}`
+                    pathname === `/deck/${subDeck.id}`
                       ? 'bg-primary/10 text-primary'
                       : 'hover:bg-accent'
                   )}
                 >
-                  <span>{subRepo.icon}</span>
-                  <span className="flex-1 truncate">{subRepo.name}</span>
-                  <span className="text-xs text-muted-foreground">{subRepo.documentCount}</span>
+                  <span>{subDeck.icon}</span>
+                  <span className="flex-1 truncate">{subDeck.name}</span>
+                  <span className="text-xs text-muted-foreground">{subDeck.dropCount}</span>
                 </div>
               </Link>
             ))}
@@ -88,39 +118,43 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 border-r bg-background">
+    <aside
+      ref={sidebarRef}
+      className="relative border-r bg-background mr-4"
+      style={{ width: `${sidebarWidth}px`, minWidth: '200px', maxWidth: '600px' }}
+    >
       <div className="flex h-full flex-col">
-        {/* New Repository Button */}
+        {/* New Deck Button */}
         <div className="p-4">
           <Button className="w-full" size="sm">
             <Plus className="mr-2 h-4 w-4" />
-            새 Repository
+            새 Deck
           </Button>
         </div>
 
         <Separator />
 
-        {/* Repository List */}
+        {/* Deck List */}
         <ScrollArea className="flex-1 px-3">
           <div className="space-y-4 py-4">
-            {/* My Repositories */}
+            {/* My Decks */}
             <div>
               <h3 className="mb-2 px-3 text-xs font-semibold text-muted-foreground">
-                📁 My Repositories
+                📁 My Decks
               </h3>
               <div className="space-y-1">
-                {repositories.map((repo) => renderRepository(repo))}
+                {decks.map((deck) => renderDeck(deck))}
               </div>
             </div>
 
             {/* Shared with Me */}
-            {sharedRepos.length > 0 && (
+            {sharedDecks.length > 0 && (
               <div>
                 <h3 className="mb-2 px-3 text-xs font-semibold text-muted-foreground">
                   🤝 Shared with Me
                 </h3>
                 <div className="space-y-1">
-                  {sharedRepos.map((repo) => renderRepository(repo))}
+                  {sharedDecks.map((deck) => renderDeck(deck))}
                 </div>
               </div>
             )}
@@ -151,6 +185,12 @@ export function Sidebar() {
           </Link>
         </div>
       </div>
+
+      {/* Resize Handle */}
+      <div
+        className="absolute right-0 top-0 h-full w-1 cursor-col-resize bg-transparent hover:bg-primary/20 transition-colors"
+        onMouseDown={() => setIsResizing(true)}
+      />
     </aside>
   );
 }
