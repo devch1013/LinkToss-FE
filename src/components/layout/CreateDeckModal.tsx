@@ -20,6 +20,7 @@ interface CreateDeckModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     onSuccess?: () => void;
+    parentId?: string | null;
 }
 
 const COLOR_OPTIONS = [
@@ -37,7 +38,7 @@ const COLOR_OPTIONS = [
     '#ec4899', // pink
 ];
 
-export function CreateDeckModal({ open, onOpenChange, onSuccess }: CreateDeckModalProps) {
+export function CreateDeckModal({ open, onOpenChange, onSuccess, parentId }: CreateDeckModalProps) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [colorHex, setColorHex] = useState(COLOR_OPTIONS[0]);
@@ -60,9 +61,10 @@ export function CreateDeckModal({ open, onOpenChange, onSuccess }: CreateDeckMod
                 description: description.trim() || null,
                 color_hex: colorHex,
                 is_public: isPublic,
+                parent: parentId || null,
             });
 
-            toast.success('덱을 생성했어요');
+            toast.success(parentId ? 'Sub-deck을 생성했어요' : '덱을 생성했어요');
 
             // 폼 초기화
             setName('');
@@ -85,9 +87,9 @@ export function CreateDeckModal({ open, onOpenChange, onSuccess }: CreateDeckMod
             <DialogContent className="sm:max-w-[500px]">
                 <form onSubmit={handleSubmit}>
                     <DialogHeader>
-                        <DialogTitle>새 Deck 만들기</DialogTitle>
+                        <DialogTitle>{parentId ? '새 Sub-deck 만들기' : '새 Deck 만들기'}</DialogTitle>
                         <DialogDescription>
-                            새로운 덱을 만들어 링크를 정리하세요
+                            {parentId ? '현재 덱의 하위 덱을 만들어 링크를 더 세분화하세요' : '새로운 덱을 만들어 링크를 정리하세요'}
                         </DialogDescription>
                     </DialogHeader>
 

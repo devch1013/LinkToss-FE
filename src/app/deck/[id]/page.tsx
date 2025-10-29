@@ -1,5 +1,7 @@
 'use client';
 
+import type { DeckDetail } from '@/apis/data-contracts';
+import { CreateDeckModal } from '@/components/layout/CreateDeckModal';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Badge } from '@/components/ui/badge';
@@ -8,8 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
-import { mockDeckApi, mockDropApi } from '@/lib/mock-api';
-import type { Deck, Drop } from '@/types';
+import { decksApi } from '@/lib/api-client';
 import { ExternalLink, Folder, Plus, Search, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
@@ -19,10 +20,10 @@ export default function DeckDetailPage() {
     const params = useParams();
     const router = useRouter();
     const { user, isLoading } = useAuth();
-    const [deck, setDeck] = useState<Deck | null>(null);
-    const [drops, setDrops] = useState<Drop[]>([]);
+    const [deck, setDeck] = useState<DeckDetail | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('recent');
+    const [isCreateSubDeckModalOpen, setIsCreateSubDeckModalOpen] = useState(false);
 
     useEffect(() => {
         if (!isLoading && !user) {
@@ -30,17 +31,18 @@ export default function DeckDetailPage() {
         }
     }, [user, isLoading, router]);
 
-    useEffect(() => {
-        const loadDeck = async () => {
-            if (params.id) {
-                const deck = await mockDeckApi.getDeck(params.id as string);
-                setDeck(deck);
-
-                const drops = await mockDropApi.getDrops(params.id as string);
-                setDrops(drops);
+    const loadDeck = async () => {
+        if (params.id) {
+            try {
+                const deckResponse = await decksApi.decksRead({ id: params.id as string });
+                setDeck(deckResponse.data);
+            } catch (error) {
+                console.error('Failed to load deck:', error);
             }
-        };
+        }
+    };
 
+    useEffect(() => {
         if (user && params.id) {
             loadDeck();
         }
@@ -57,9 +59,12 @@ export default function DeckDetailPage() {
         );
     }
 
+    const drops = deck?.drops || [];
+    const subDecks = deck?.children || [];
+
     const filteredDrops = drops.filter((drop) =>
         drop.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        drop.content.toLowerCase().includes(searchQuery.toLowerCase())
+        (drop.content && drop.content.toLowerCase().includes(searchQuery.toLowerCase()))
     );
 
     return (
@@ -72,19 +77,30 @@ export default function DeckDetailPage() {
                         {/* Breadcrumb */}
                         <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
                             <Link href="/dashboard" className="hover:text-foreground">홈</Link>
+                            {deck.breadcrumb && deck.breadcrumb.map((crumb) => (
+                                <div key={crumb.id} className="flex items-center gap-2">
+                                    <span>/</span>
+                                    <Link
+                                        href={`/deck/${crumb.id}`}
+                                        className="hover:text-foreground"
+                                    >
+                                        {crumb.name}
+                                    </Link>
+                                </div>
+                            ))}
                             <span>/</span>
-                            <span className="text-foreground">{deck.name}</span>
+                            <span className="text-foreground font-semibold">{deck.name}</span>
                         </div>
 
                         {/* Deck Header */}
                         <div className="mb-8 flex items-start justify-between">
                             <div className="flex-1">
                                 <div className="flex items-center gap-3">
-                                    <span className="text-4xl">{deck.icon}</span>
+                                    <span className="text-4xl">📁</span>
                                     <div>
                                         <div className="flex items-center gap-2">
                                             <h1 className="text-3xl font-bold">{deck.name}</h1>
-                                            {deck.isPublic && (
+                                            {deck.is_public && (
                                                 <Badge variant="secondary" className="gap-1">
                                                     🌍 Public
                                                 </Badge>
@@ -130,31 +146,37 @@ export default function DeckDetailPage() {
                                     새 Drop
                                 </Link>
                             </Button>
-                            <Button variant="outline" asChild>
-                                <Link href={`/deck/${deck.id}/sub-deck`}>
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Sub-deck
-                                </Link>
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsCreateSubDeckModalOpen(true)}
+                            >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Sub-deck
                             </Button>
                         </div>
 
                         {/* Sub-decks */}
-                        {deck.subDecks && deck.subDecks.length > 0 && (
+                        {subDecks.length > 0 && (
                             <div className="mb-8">
-                                <h2 className="mb-4 text-xl font-semibold">📁 Sub-decks ({deck.subDecks.length})</h2>
+                                <h2 className="mb-4 text-xl font-semibold">📁 Sub-decks ({subDecks.length})</h2>
                                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                                    {deck.subDecks.map((subDeck) => (
+                                    {subDecks.map((subDeck) => (
                                         <Link key={subDeck.id} href={`/deck/${subDeck.id}`}>
                                             <Card className="transition-all hover:shadow-md">
                                                 <CardHeader>
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-2xl">{subDeck.icon}</span>
+                                                        <div
+                                                            className="w-6 h-6 rounded"
+                                                            style={{ backgroundColor: subDeck.color_hex }}
+                                                        />
                                                         <CardTitle className="text-base">{subDeck.name}</CardTitle>
                                                     </div>
+                                                    {subDeck.description && (
+                                                        <p className="text-xs text-muted-foreground line-clamp-2">
+                                                            {subDeck.description}
+                                                        </p>
+                                                    )}
                                                 </CardHeader>
-                                                <CardContent>
-                                                    <p className="text-sm text-muted-foreground">{subDeck.dropCount} drops</p>
-                                                </CardContent>
                                             </Card>
                                         </Link>
                                     ))}
@@ -179,18 +201,16 @@ export default function DeckDetailPage() {
                                                     </CardDescription>
                                                 </CardHeader>
                                                 <CardContent>
-                                                    {drop.contentPreview && (
+                                                    {drop.content && (
                                                         <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
-                                                            {drop.contentPreview}
+                                                            {drop.content}
                                                         </p>
                                                     )}
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {drop.tags.slice(0, 3).map((tag) => (
-                                                            <Badge key={tag.id} variant="secondary" className="text-xs">
-                                                                #{tag.name}
-                                                            </Badge>
-                                                        ))}
-                                                    </div>
+                                                    {drop.memo && (
+                                                        <p className="text-xs text-muted-foreground italic">
+                                                            {drop.memo}
+                                                        </p>
+                                                    )}
                                                 </CardContent>
                                             </Card>
                                         </Link>
@@ -217,6 +237,12 @@ export default function DeckDetailPage() {
                     </div>
                 </main>
             </div>
+            <CreateDeckModal
+                open={isCreateSubDeckModalOpen}
+                onOpenChange={setIsCreateSubDeckModalOpen}
+                parentId={deck?.id}
+                onSuccess={loadDeck}
+            />
         </div>
     );
 }

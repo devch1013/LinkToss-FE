@@ -127,34 +127,18 @@ export interface DeckTree {
   updated_at?: string;
 }
 
-export interface DeckUpdate {
+export interface Breadcrumb {
+  /**
+   * Id
+   * @format uuid
+   */
+  id?: string;
   /**
    * Name
    * @minLength 1
    * @maxLength 255
    */
-  name?: string;
-  /** Description */
-  description?: string | null;
-  /**
-   * Color hex
-   * @minLength 1
-   * @maxLength 7
-   */
-  color_hex?: string;
-  /**
-   * Parent
-   * @format uuid
-   */
-  parent?: string | null;
-  /**
-   * Order
-   * @min -2147483648
-   * @max 2147483647
-   */
-  order?: number;
-  /** Is public */
-  is_public?: boolean;
+  name: string;
 }
 
 export interface Drop {
@@ -197,6 +181,88 @@ export interface Drop {
    * @format date-time
    */
   updated_at?: string;
+}
+
+export interface DeckDetail {
+  /**
+   * Id
+   * @format uuid
+   */
+  id?: string;
+  /**
+   * Name
+   * @minLength 1
+   * @maxLength 255
+   */
+  name: string;
+  /** Description */
+  description?: string | null;
+  /**
+   * Color hex
+   * @minLength 1
+   * @maxLength 7
+   */
+  color_hex?: string;
+  /**
+   * Parent
+   * @format uuid
+   */
+  parent?: string | null;
+  /**
+   * Order
+   * @min -2147483648
+   * @max 2147483647
+   */
+  order?: number;
+  /** Is public */
+  is_public?: boolean;
+  /** Depth */
+  depth?: number;
+  /** Children count */
+  children_count?: string;
+  breadcrumb?: Breadcrumb[];
+  children?: Deck[];
+  drops?: Drop[];
+  /**
+   * Created at
+   * @format date-time
+   */
+  created_at?: string;
+  /**
+   * Updated at
+   * @format date-time
+   */
+  updated_at?: string;
+}
+
+export interface DeckUpdate {
+  /**
+   * Name
+   * @minLength 1
+   * @maxLength 255
+   */
+  name?: string;
+  /** Description */
+  description?: string | null;
+  /**
+   * Color hex
+   * @minLength 1
+   * @maxLength 7
+   */
+  color_hex?: string;
+  /**
+   * Parent
+   * @format uuid
+   */
+  parent?: string | null;
+  /**
+   * Order
+   * @min -2147483648
+   * @max 2147483647
+   */
+  order?: number;
+  /** Is public */
+  is_public?: boolean;
 }
 
 export interface DropCreate {
@@ -535,7 +601,7 @@ export interface DecksReadParams {
   id: string;
 }
 
-export type DecksReadData = Deck;
+export type DecksReadData = DeckDetail;
 
 export interface DecksUpdateParams {
   id: string;

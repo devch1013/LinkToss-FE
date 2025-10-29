@@ -90,7 +90,7 @@ export class Decks<
       ...params,
     });
   /**
-   * @description 특정 deck의 상세 정보를 조회합니다.
+   * @description 특정 deck의 상세 정보를 조회합니다. sub-deck과 drops 정보를 포함합니다.
    *
    * @tags decks
    * @name DecksRead
