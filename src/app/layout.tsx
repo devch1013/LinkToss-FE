@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -10,22 +12,26 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "LinkToss - 링크를 저장하고, 정리하고, 공유하세요",
-  description: "마크다운으로 노트를 작성하고 체계적으로 관리하는 링크 저장소",
+  title: "LinkToss - Save, Organize, and Share Your Links",
+  description: "Link repository where you can write notes in markdown and manage them systematically",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const messages = await getMessages();
+
   return (
-    <html lang="ko">
+    <html lang="en">
       <body className={`${inter.variable} font-sans antialiased`}>
-        <AuthProvider>
-          {children}
-          <Toaster />
-        </AuthProvider>
+        <NextIntlClientProvider messages={messages} locale="en">
+          <AuthProvider>
+            {children}
+            <Toaster />
+          </AuthProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

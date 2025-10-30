@@ -1,0 +1,30 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "delete": "Delete",
+    "edit": "Edit",
+    "share": "Share",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "home": "Home",
+    "anonymous": "Anonymous"
+  },
+  "metadata": {
+    "title": "LinkToss - Save, Organize, and Share Your Links",
+    "description": "Link repository where you can write notes in markdown and manage them systematically"
+  },
+  "drop": {
+    "confirmDelete": "Are you sure you want to delete?",
+    "goToDeck": "Go to Deck",
+    "memo": "Memo",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "comments": "Comments",
+    "writeComment": "Write Comment",
+    "commentPlaceholder": "Write a comment...",
+    "replyPlaceholder": "Write a reply...",
+    "reply": "Reply",
+    "firstComment": "Be the first to comment!"
+  }
+}
+

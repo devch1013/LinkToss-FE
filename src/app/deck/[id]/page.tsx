@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { decksApi } from '@/lib/api-client';
 import { ExternalLink, Folder, Plus, Search, Settings } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -190,31 +191,57 @@ export default function DeckDetailPage() {
 
                             {filteredDrops.length > 0 ? (
                                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    {filteredDrops.map((drop) => (
-                                        <Link key={drop.id} href={`/drop/${drop.id}`}>
-                                            <Card className="h-full transition-all hover:shadow-md">
-                                                <CardHeader>
-                                                    <CardTitle className="line-clamp-1 text-base">{drop.title}</CardTitle>
-                                                    <CardDescription className="flex items-center gap-1 text-xs">
-                                                        <ExternalLink className="h-3 w-3" />
-                                                        <span className="truncate">{drop.url}</span>
-                                                    </CardDescription>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    {drop.content && (
-                                                        <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
-                                                            {drop.content}
-                                                        </p>
+                                    {filteredDrops.map((drop) => {
+                                        const thumbnailUrl = drop.meta_image_url || drop.screenshot_url;
+                                        return (
+                                            <Link key={drop.id} href={`/drop/${drop.id}`}>
+                                                <Card className="h-full overflow-hidden transition-all hover:shadow-md">
+                                                    {thumbnailUrl && (
+                                                        <div className="relative aspect-video w-full overflow-hidden bg-muted">
+                                                            <Image
+                                                                src={thumbnailUrl}
+                                                                alt={drop.title}
+                                                                fill
+                                                                className="object-cover"
+                                                                unoptimized
+                                                            />
+                                                        </div>
                                                     )}
-                                                    {drop.memo && (
-                                                        <p className="text-xs text-muted-foreground italic">
-                                                            {drop.memo}
-                                                        </p>
-                                                    )}
-                                                </CardContent>
-                                            </Card>
-                                        </Link>
-                                    ))}
+                                                    <CardHeader>
+                                                        <CardTitle className="flex items-center gap-2 text-base">
+                                                            {drop.favicon_url && (
+                                                                <Image
+                                                                    src={drop.favicon_url}
+                                                                    alt=""
+                                                                    width={16}
+                                                                    height={16}
+                                                                    className="shrink-0"
+                                                                    unoptimized
+                                                                />
+                                                            )}
+                                                            <span className="line-clamp-1">{drop.title}</span>
+                                                        </CardTitle>
+                                                        <CardDescription className="flex items-center gap-1 text-xs">
+                                                            <ExternalLink className="h-3 w-3 shrink-0" />
+                                                            <span className="truncate">{drop.url}</span>
+                                                        </CardDescription>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        {drop.content && (
+                                                            <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
+                                                                {drop.content}
+                                                            </p>
+                                                        )}
+                                                        {drop.memo && (
+                                                            <p className="text-xs italic text-muted-foreground">
+                                                                {drop.memo}
+                                                            </p>
+                                                        )}
+                                                    </CardContent>
+                                                </Card>
+                                            </Link>
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <Card>
