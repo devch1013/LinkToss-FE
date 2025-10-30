@@ -55,6 +55,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.setItem('access_token', tokenData.access_token);
             localStorage.setItem('refresh_token', tokenData.refresh_token);
             localStorage.setItem('user_id', tokenData.user_id.toString());
+
+            // 익스텐션에 토큰 전달
+            if (typeof window !== 'undefined') {
+              window.postMessage(
+                { type: 'AUTH_TOKEN', token: tokenData.access_token },
+                'http://localhost:3000'
+              );
+            }
           } catch (error) {
             console.error('Failed to get backend token:', error);
           }
@@ -85,6 +93,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('access_token', tokenData.access_token);
       localStorage.setItem('refresh_token', tokenData.refresh_token);
       localStorage.setItem('user_id', tokenData.user_id.toString());
+
+      // 익스텐션에 토큰 전달
+      if (typeof window !== 'undefined') {
+        window.postMessage(
+          { type: 'AUTH_TOKEN', token: tokenData.access_token },
+          'http://localhost:3000'
+        );
+      }
 
       // 5. 사용자 정보 설정
       setUser(convertFirebaseUser(result.user));

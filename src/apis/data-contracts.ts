@@ -172,6 +172,24 @@ export interface Drop {
   /** Tags */
   tags?: string;
   /**
+   * Favicon url
+   * @format uri
+   * @maxLength 200
+   */
+  favicon_url?: string | null;
+  /**
+   * Screenshot url
+   * @format uri
+   * @maxLength 200
+   */
+  screenshot_url?: string | null;
+  /**
+   * Meta image url
+   * @format uri
+   * @maxLength 200
+   */
+  meta_image_url?: string | null;
+  /**
    * Created at
    * @format date-time
    */

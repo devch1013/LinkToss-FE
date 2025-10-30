@@ -1,14 +1,14 @@
 'use client';
 
+import type { DeckDetail } from '@/apis/data-contracts';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
-import { mockDropApi } from '@/lib/mock-api';
+import { decksApi, dropsApi } from '@/lib/api-client';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -18,12 +18,11 @@ export default function NewDropPage() {
     const params = useParams();
     const router = useRouter();
     const { user, isLoading } = useAuth();
+    const [deck, setDeck] = useState<DeckDetail | null>(null);
     const [url, setUrl] = useState('');
     const [title, setTitle] = useState('');
-    const [content, setContent] = useState('');
+    const [memo, setMemo] = useState('');
     const [tags, setTags] = useState('');
-    const [metadata, setMetadata] = useState<any>(null);
-    const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
 
     useEffect(() => {
         if (!isLoading && !user) {
@@ -31,22 +30,22 @@ export default function NewDropPage() {
         }
     }, [user, isLoading, router]);
 
-    const fetchMetadata = async () => {
-        if (!url) return;
-
-        setIsLoadingMetadata(true);
-        try {
-            const meta = await mockDropApi.fetchMetadata(url);
-            setMetadata(meta);
-            if (meta.ogTitle && !title) {
-                setTitle(meta.ogTitle);
+    const loadDeck = async () => {
+        if (params.id) {
+            try {
+                const deckResponse = await decksApi.decksRead({ id: params.id as string });
+                setDeck(deckResponse.data);
+            } catch (error) {
+                console.error('Failed to load deck:', error);
             }
-        } catch (error) {
-            toast.error('메타데이터를 가져오는데 실패했습니다.');
-        } finally {
-            setIsLoadingMetadata(false);
         }
     };
+
+    useEffect(() => {
+        if (user && params.id) {
+            loadDeck();
+        }
+    }, [user, params.id]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -59,11 +58,12 @@ export default function NewDropPage() {
         try {
             const tagArray = tags.split(',').map(t => t.trim()).filter(Boolean);
 
-            await mockDropApi.createDrop({
-                deckId: params.id as string,
+            await dropsApi.dropsCreate({
+                deck: params.id as string,
                 title,
                 url,
-                content,
+                memo: memo || null,
+                content: null,
                 tags: tagArray,
             });
 
@@ -74,7 +74,7 @@ export default function NewDropPage() {
         }
     };
 
-    if (isLoading || !user) {
+    if (isLoading || !user || !deck) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="text-center">
@@ -95,8 +95,19 @@ export default function NewDropPage() {
                         {/* Breadcrumb */}
                         <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
                             <Link href="/dashboard" className="hover:text-foreground">홈</Link>
+                            {deck.breadcrumb && deck.breadcrumb.map((crumb) => (
+                                <div key={crumb.id} className="flex items-center gap-2">
+                                    <span>/</span>
+                                    <Link
+                                        href={`/deck/${crumb.id}`}
+                                        className="hover:text-foreground"
+                                    >
+                                        {crumb.name}
+                                    </Link>
+                                </div>
+                            ))}
                             <span>/</span>
-                            <Link href={`/deck/${params.id}`} className="hover:text-foreground">Deck</Link>
+                            <Link href={`/deck/${params.id}`} className="hover:text-foreground">{deck.name}</Link>
                             <span>/</span>
                             <span className="text-foreground">새 Drop</span>
                         </div>
@@ -107,46 +118,14 @@ export default function NewDropPage() {
                             {/* URL Input */}
                             <div className="space-y-2">
                                 <Label htmlFor="url">🔗 링크 URL *</Label>
-                                <div className="flex gap-2">
-                                    <Input
-                                        id="url"
-                                        type="url"
-                                        placeholder="https://example.com"
-                                        value={url}
-                                        onChange={(e) => setUrl(e.target.value)}
-                                        className="flex-1"
-                                    />
-                                    <Button
-                                        type="button"
-                                        onClick={fetchMetadata}
-                                        disabled={isLoadingMetadata || !url}
-                                    >
-                                        {isLoadingMetadata ? '가져오는 중...' : '가져오기'}
-                                    </Button>
-                                </div>
+                                <Input
+                                    id="url"
+                                    type="url"
+                                    placeholder="https://example.com"
+                                    value={url}
+                                    onChange={(e) => setUrl(e.target.value)}
+                                />
                             </div>
-
-                            {/* Metadata Preview */}
-                            {metadata && (
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle className="text-base">링크 프리뷰</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="space-y-2 text-sm">
-                                            {metadata.ogTitle && <p><strong>제목:</strong> {metadata.ogTitle}</p>}
-                                            {metadata.ogDescription && <p><strong>설명:</strong> {metadata.ogDescription}</p>}
-                                            {metadata.ogImage && (
-                                                <img
-                                                    src={metadata.ogImage}
-                                                    alt="Preview"
-                                                    className="mt-2 h-32 w-full rounded object-cover"
-                                                />
-                                            )}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            )}
 
                             {/* Title Input */}
                             <div className="space-y-2">
@@ -159,14 +138,14 @@ export default function NewDropPage() {
                                 />
                             </div>
 
-                            {/* Content Input */}
+                            {/* Memo Input */}
                             <div className="space-y-2">
-                                <Label htmlFor="content">📝 노트 (마크다운)</Label>
+                                <Label htmlFor="memo">📝 노트 (마크다운)</Label>
                                 <Textarea
-                                    id="content"
+                                    id="memo"
                                     placeholder="마크다운 형식으로 노트를 작성하세요...&#10;&#10;# 제목&#10;## 부제목&#10;- 목록"
-                                    value={content}
-                                    onChange={(e) => setContent(e.target.value)}
+                                    value={memo}
+                                    onChange={(e) => setMemo(e.target.value)}
                                     rows={15}
                                     className="font-mono text-sm"
                                 />

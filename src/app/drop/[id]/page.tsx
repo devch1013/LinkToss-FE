@@ -1,14 +1,14 @@
 'use client';
 
+import type { CommentTree, Drop } from '@/apis/data-contracts';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
-import { mockDropApi } from '@/lib/mock-api';
-import type { Drop } from '@/types';
-import { Edit, ExternalLink, Share, Trash2 } from 'lucide-react';
+import { dropsApi } from '@/lib/api-client';
+import { Edit, ExternalLink, MessageCircle, Share, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -18,6 +18,10 @@ export default function DropDetailPage() {
     const router = useRouter();
     const { user, isLoading } = useAuth();
     const [drop, setDrop] = useState<Drop | null>(null);
+    const [comments, setComments] = useState<CommentTree[]>([]);
+    const [newComment, setNewComment] = useState('');
+    const [replyingTo, setReplyingTo] = useState<string | null>(null);
+    const [replyContent, setReplyContent] = useState('');
 
     useEffect(() => {
         if (!isLoading && !user) {
@@ -28,21 +32,138 @@ export default function DropDetailPage() {
     useEffect(() => {
         const loadDrop = async () => {
             if (params.id) {
-                const drop = await mockDropApi.getDrop(params.id as string);
-                setDrop(drop);
+                try {
+                    const response = await dropsApi.dropsRead({ id: params.id as string });
+                    setDrop(response.data);
+                } catch (error) {
+                    console.error('Failed to load drop:', error);
+                }
+            }
+        };
+
+        const loadComments = async () => {
+            if (params.id) {
+                try {
+                    const response = await dropsApi.dropsCommentsTree({ drop_id: params.id as string });
+                    const commentsData = response.data;
+                    setComments(Array.isArray(commentsData) ? commentsData : []);
+                } catch (error) {
+                    console.error('Failed to load comments:', error);
+                }
             }
         };
 
         if (user && params.id) {
             loadDrop();
+            loadComments();
         }
     }, [user, params.id]);
 
     const handleDelete = async () => {
         if (drop && confirm('정말 삭제하시겠습니까?')) {
-            await mockDropApi.deleteDrop(drop.id);
-            router.push(`/deck/${drop.deckId}`);
+            try {
+                await dropsApi.dropsDelete({ id: drop.id! });
+                router.push(`/deck/${drop.deck}`);
+            } catch (error) {
+                console.error('Failed to delete drop:', error);
+            }
         }
+    };
+
+    const handleCommentSubmit = async () => {
+        if (!newComment.trim() || !drop) return;
+
+        try {
+            await dropsApi.dropsCommentsCreate({
+                drop: drop.id!,
+                content: newComment,
+            });
+            setNewComment('');
+            // 댓글 목록 새로고침
+            const response = await dropsApi.dropsCommentsTree({ drop_id: drop.id! });
+            const commentsData = response.data;
+            setComments(Array.isArray(commentsData) ? commentsData : []);
+        } catch (error) {
+            console.error('Failed to create comment:', error);
+        }
+    };
+
+    const handleReplySubmit = async (parentId: string) => {
+        if (!replyContent.trim() || !drop) return;
+
+        try {
+            await dropsApi.dropsCommentsCreate({
+                drop: drop.id!,
+                content: replyContent,
+                parent: parentId,
+            });
+            setReplyContent('');
+            setReplyingTo(null);
+            // 댓글 목록 새로고침
+            const response = await dropsApi.dropsCommentsTree({ drop_id: drop.id! });
+            const commentsData = response.data;
+            setComments(Array.isArray(commentsData) ? commentsData : []);
+        } catch (error) {
+            console.error('Failed to create reply:', error);
+        }
+    };
+
+    const renderComment = (comment: CommentTree, depth: number = 0) => {
+        const replies = comment.replies ? (typeof comment.replies === 'string' ? JSON.parse(comment.replies) : comment.replies) : [];
+
+        return (
+            <div key={comment.id} className={depth > 0 ? 'ml-8 mt-4' : 'mt-4'}>
+                <Card className="p-4">
+                    <div className="flex items-start gap-3">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="font-medium text-sm">{comment.user_name || '익명'}</span>
+                                <span className="text-xs text-muted-foreground">
+                                    {new Date(comment.created_at!).toLocaleDateString('ko-KR')}
+                                </span>
+                            </div>
+                            <p className="text-sm">{comment.content}</p>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="mt-2"
+                                onClick={() => setReplyingTo(comment.id!)}
+                            >
+                                <MessageCircle className="mr-1 h-3 w-3" />
+                                답글
+                            </Button>
+
+                            {replyingTo === comment.id && (
+                                <div className="mt-3">
+                                    <Textarea
+                                        placeholder="답글을 입력하세요..."
+                                        value={replyContent}
+                                        onChange={(e) => setReplyContent(e.target.value)}
+                                        className="mb-2"
+                                    />
+                                    <div className="flex gap-2">
+                                        <Button size="sm" onClick={() => handleReplySubmit(comment.id!)}>
+                                            작성
+                                        </Button>
+                                        <Button size="sm" variant="outline" onClick={() => {
+                                            setReplyingTo(null);
+                                            setReplyContent('');
+                                        }}>
+                                            취소
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </Card>
+                {Array.isArray(replies) && replies.length > 0 && (
+                    <div>
+                        {replies.map((reply: CommentTree) => renderComment(reply, depth + 1))}
+                    </div>
+                )}
+            </div>
+        );
     };
 
     if (isLoading || !user || !drop) {
@@ -67,14 +188,10 @@ export default function DropDetailPage() {
                         <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
                             <Link href="/dashboard" className="hover:text-foreground">홈</Link>
                             <span>/</span>
-                            {drop.deck && (
-                                <>
-                                    <Link href={`/deck/${drop.deck.id}`} className="hover:text-foreground">
-                                        {drop.deck.name}
-                                    </Link>
-                                    <span>/</span>
-                                </>
-                            )}
+                            <Link href={`/deck/${drop.deck}`} className="hover:text-foreground">
+                                덱으로 이동
+                            </Link>
+                            <span>/</span>
                             <span className="text-foreground">{drop.title}</span>
                         </div>
 
@@ -110,72 +227,49 @@ export default function DropDetailPage() {
                             </div>
                         </div>
 
-                        {/* Link Preview */}
-                        {drop.linkMetadata && (
-                            <Card className="mb-8 overflow-hidden">
-                                {drop.linkMetadata.ogImage && (
-                                    <img
-                                        src={drop.linkMetadata.ogImage}
-                                        alt={drop.linkMetadata.ogTitle || drop.title}
-                                        className="h-64 w-full object-cover"
-                                    />
-                                )}
-                                <div className="p-6">
-                                    {drop.linkMetadata.ogTitle && (
-                                        <h3 className="mb-2 text-xl font-semibold">{drop.linkMetadata.ogTitle}</h3>
-                                    )}
-                                    {drop.linkMetadata.ogDescription && (
-                                        <p className="text-muted-foreground">{drop.linkMetadata.ogDescription}</p>
-                                    )}
-                                </div>
-                            </Card>
-                        )}
-
-                        {/* Drop Content */}
-                        {drop.content && (
+                        {/* Memo */}
+                        {drop.memo && (
                             <div className="mb-8">
-                                <h2 className="mb-4 text-xl font-semibold">📝 노트</h2>
+                                <h2 className="mb-4 text-xl font-semibold">📝 메모</h2>
                                 <Card className="p-6">
-                                    <div className="prose prose-sm max-w-none dark:prose-invert">
-                                        {/* Simple markdown rendering - in real app, use react-markdown */}
-                                        {drop.content.split('\n').map((line, i) => {
-                                            if (line.startsWith('# ')) {
-                                                return <h1 key={i} className="text-2xl font-bold mb-4">{line.slice(2)}</h1>;
-                                            }
-                                            if (line.startsWith('## ')) {
-                                                return <h2 key={i} className="text-xl font-semibold mb-3">{line.slice(3)}</h2>;
-                                            }
-                                            if (line.startsWith('- ')) {
-                                                return <li key={i} className="ml-4">{line.slice(2)}</li>;
-                                            }
-                                            if (line.trim() === '') {
-                                                return <br key={i} />;
-                                            }
-                                            return <p key={i} className="mb-2">{line}</p>;
-                                        })}
-                                    </div>
+                                    <p className="text-sm whitespace-pre-wrap">{drop.memo}</p>
                                 </Card>
                             </div>
                         )}
 
-                        {/* Tags */}
-                        {drop.tags && drop.tags.length > 0 && (
-                            <div className="mb-8">
-                                <h2 className="mb-3 text-xl font-semibold">🏷️ 태그</h2>
-                                <div className="flex flex-wrap gap-2">
-                                    {drop.tags.map((tag) => (
-                                        <Badge key={tag.id} variant="secondary" style={{ backgroundColor: tag.color + '20', color: tag.color }}>
-                                            #{tag.name}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
                         {/* Meta Info */}
-                        <div className="text-sm text-muted-foreground">
-                            <p>생성일: {new Date(drop.createdAt).toLocaleDateString('ko-KR')}</p>
-                            <p>수정일: {new Date(drop.updatedAt).toLocaleDateString('ko-KR')}</p>
+                        <div className="mb-8 text-sm text-muted-foreground">
+                            <p>생성일: {new Date(drop.created_at!).toLocaleDateString('ko-KR')}</p>
+                            <p>수정일: {new Date(drop.updated_at!).toLocaleDateString('ko-KR')}</p>
+                        </div>
+
+                        {/* Comments Section */}
+                        <div className="mb-8">
+                            <h2 className="mb-4 text-xl font-semibold">💬 댓글 ({comments.length})</h2>
+
+                            {/* New Comment Form */}
+                            <Card className="p-4 mb-6">
+                                <Textarea
+                                    placeholder="댓글을 입력하세요..."
+                                    value={newComment}
+                                    onChange={(e) => setNewComment(e.target.value)}
+                                    className="mb-2"
+                                />
+                                <Button onClick={handleCommentSubmit} disabled={!newComment.trim()}>
+                                    댓글 작성
+                                </Button>
+                            </Card>
+
+                            {/* Comments List */}
+                            {comments.length === 0 ? (
+                                <p className="text-sm text-muted-foreground text-center py-8">
+                                    첫 댓글을 남겨보세요!
+                                </p>
+                            ) : (
+                                <div>
+                                    {comments.map((comment) => renderComment(comment))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </main>
