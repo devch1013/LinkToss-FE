@@ -13,8 +13,10 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 export default function NewDropPage() {
+    const t = useTranslations();
     const params = useParams();
     const router = useRouter();
     const { user, isLoading } = useAuth();
@@ -51,7 +53,7 @@ export default function NewDropPage() {
         e.preventDefault();
 
         if (!url || !title) {
-            toast.error('URL과 제목을 입력해주세요.');
+            toast.error(t('newDrop.requiredError'));
             return;
         }
 
@@ -67,10 +69,10 @@ export default function NewDropPage() {
                 tags: tagArray,
             });
 
-            toast.success('Drop이 생성되었습니다!');
+            toast.success(t('newDrop.createSuccess'));
             router.push(`/deck/${params.id}`);
         } catch (error) {
-            toast.error('Drop 생성에 실패했습니다.');
+            toast.error(t('newDrop.createError'));
         }
     };
 
@@ -79,7 +81,7 @@ export default function NewDropPage() {
             <div className="flex min-h-screen items-center justify-center">
                 <div className="text-center">
                     <div className="text-2xl">🔗</div>
-                    <p className="mt-2 text-sm text-muted-foreground">로딩 중...</p>
+                    <p className="mt-2 text-sm text-muted-foreground">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -94,7 +96,7 @@ export default function NewDropPage() {
                     <div className="container max-w-4xl py-8">
                         {/* Breadcrumb */}
                         <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-                            <Link href="/dashboard" className="hover:text-foreground">홈</Link>
+                            <Link href="/dashboard" className="hover:text-foreground">{t('common.home')}</Link>
                             {deck.breadcrumb && deck.breadcrumb.map((crumb) => (
                                 <div key={crumb.id} className="flex items-center gap-2">
                                     <span>/</span>
@@ -109,19 +111,19 @@ export default function NewDropPage() {
                             <span>/</span>
                             <Link href={`/deck/${params.id}`} className="hover:text-foreground">{deck.name}</Link>
                             <span>/</span>
-                            <span className="text-foreground">새 Drop</span>
+                            <span className="text-foreground">{t('deck.newDrop')}</span>
                         </div>
 
-                        <h1 className="mb-8 text-3xl font-bold">새 Drop 추가</h1>
+                        <h1 className="mb-8 text-3xl font-bold">{t('newDrop.title')}</h1>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {/* URL Input */}
                             <div className="space-y-2">
-                                <Label htmlFor="url">🔗 링크 URL *</Label>
+                                <Label htmlFor="url">{t('newDrop.urlLabel')}</Label>
                                 <Input
                                     id="url"
                                     type="url"
-                                    placeholder="https://example.com"
+                                    placeholder={t('newDrop.urlPlaceholder')}
                                     value={url}
                                     onChange={(e) => setUrl(e.target.value)}
                                 />
@@ -129,10 +131,10 @@ export default function NewDropPage() {
 
                             {/* Title Input */}
                             <div className="space-y-2">
-                                <Label htmlFor="title">📄 제목 *</Label>
+                                <Label htmlFor="title">{t('newDrop.titleLabel')}</Label>
                                 <Input
                                     id="title"
-                                    placeholder="Drop 제목"
+                                    placeholder={t('newDrop.titlePlaceholder')}
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
                                 />
@@ -140,10 +142,10 @@ export default function NewDropPage() {
 
                             {/* Memo Input */}
                             <div className="space-y-2">
-                                <Label htmlFor="memo">📝 노트 (마크다운)</Label>
+                                <Label htmlFor="memo">{t('newDrop.memoLabel')}</Label>
                                 <Textarea
                                     id="memo"
-                                    placeholder="마크다운 형식으로 노트를 작성하세요...&#10;&#10;# 제목&#10;## 부제목&#10;- 목록"
+                                    placeholder={t('newDrop.memoPlaceholder')}
                                     value={memo}
                                     onChange={(e) => setMemo(e.target.value)}
                                     rows={15}
@@ -153,10 +155,10 @@ export default function NewDropPage() {
 
                             {/* Tags Input */}
                             <div className="space-y-2">
-                                <Label htmlFor="tags">🏷️ 태그</Label>
+                                <Label htmlFor="tags">{t('newDrop.tagsLabel')}</Label>
                                 <Input
                                     id="tags"
-                                    placeholder="쉼표로 구분 (예: react, nextjs, typescript)"
+                                    placeholder={t('newDrop.tagsPlaceholder')}
                                     value={tags}
                                     onChange={(e) => setTags(e.target.value)}
                                 />
@@ -169,9 +171,9 @@ export default function NewDropPage() {
                                     variant="outline"
                                     onClick={() => router.back()}
                                 >
-                                    취소
+                                    {t('newDrop.cancel')}
                                 </Button>
-                                <Button type="submit">저장하기</Button>
+                                <Button type="submit">{t('newDrop.save')}</Button>
                             </div>
                         </form>
                     </div>

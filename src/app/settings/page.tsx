@@ -1,23 +1,35 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useTranslations } from 'next-intl';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function SettingsPage() {
   const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const [selectedLocale, setSelectedLocale] = useState(locale);
+
+  const handleLanguageChange = (newLocale: string) => {
+    setSelectedLocale(newLocale);
+    document.cookie = `NEXT_LOCALE=${newLocale}; path=/; max-age=31536000`;
+    toast.success(t('settings.languageChanged'));
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  };
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -53,10 +65,11 @@ export default function SettingsPage() {
             <h1 className="mb-8 text-3xl font-bold">{t('settings.title')}</h1>
 
             <Tabs defaultValue="profile" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="profile">{t('settings.profile')}</TabsTrigger>
                 <TabsTrigger value="security">{t('settings.security')}</TabsTrigger>
                 <TabsTrigger value="notifications">{t('settings.notifications')}</TabsTrigger>
+                <TabsTrigger value="language">{t('settings.language')}</TabsTrigger>
               </TabsList>
 
               {/* Profile Tab */}
@@ -183,6 +196,57 @@ export default function SettingsPage() {
                     </div>
 
                     <Button>{t('settings.save')}</Button>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Language Tab */}
+              <TabsContent value="language" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t('settings.languageSettings')}</CardTitle>
+                    <CardDescription>{t('settings.chooseLanguage')}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div
+                      className={`flex items-center justify-between rounded-lg border p-4 cursor-pointer transition-colors ${selectedLocale === 'ko' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}
+                      onClick={() => handleLanguageChange('ko')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">🇰🇷</div>
+                        <div>
+                          <p className="font-medium">{t('settings.korean')}</p>
+                          <p className="text-sm text-muted-foreground">한국어</p>
+                        </div>
+                      </div>
+                      {selectedLocale === 'ko' && (
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+
+                    <div
+                      className={`flex items-center justify-between rounded-lg border p-4 cursor-pointer transition-colors ${selectedLocale === 'en' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}
+                      onClick={() => handleLanguageChange('en')}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">🇺🇸</div>
+                        <div>
+                          <p className="font-medium">{t('settings.english')}</p>
+                          <p className="text-sm text-muted-foreground">English</p>
+                        </div>
+                      </div>
+                      {selectedLocale === 'en' && (
+                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>

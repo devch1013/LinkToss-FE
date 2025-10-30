@@ -13,8 +13,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { mockDocumentApi } from '@/lib/mock-api';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function NewDocumentPage() {
+  const t = useTranslations();
   const params = useParams();
   const router = useRouter();
   const { user, isLoading } = useAuth();
@@ -42,7 +44,7 @@ export default function NewDocumentPage() {
         setTitle(meta.ogTitle);
       }
     } catch (error) {
-      toast.error('메타데이터를 가져오는데 실패했습니다.');
+      toast.error(t('newDocument.fetchError'));
     } finally {
       setIsLoadingMetadata(false);
     }
@@ -52,7 +54,7 @@ export default function NewDocumentPage() {
     e.preventDefault();
 
     if (!url || !title) {
-      toast.error('URL과 제목을 입력해주세요.');
+      toast.error(t('newDocument.requiredError'));
       return;
     }
 
@@ -67,10 +69,10 @@ export default function NewDocumentPage() {
         tags: tagArray,
       });
 
-      toast.success('Document가 생성되었습니다!');
+      toast.success(t('newDocument.createSuccess'));
       router.push(`/repository/${params.id}`);
     } catch (error) {
-      toast.error('Document 생성에 실패했습니다.');
+      toast.error(t('newDocument.createError'));
     }
   };
 
@@ -79,7 +81,7 @@ export default function NewDocumentPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="text-2xl">🔗</div>
-          <p className="mt-2 text-sm text-muted-foreground">로딩 중...</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -94,24 +96,24 @@ export default function NewDocumentPage() {
           <div className="container max-w-4xl py-8">
             {/* Breadcrumb */}
             <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-              <Link href="/dashboard" className="hover:text-foreground">홈</Link>
+              <Link href="/dashboard" className="hover:text-foreground">{t('common.home')}</Link>
               <span>/</span>
-              <Link href={`/repository/${params.id}`} className="hover:text-foreground">Repository</Link>
+              <Link href={`/repository/${params.id}`} className="hover:text-foreground">{t('newDocument.repository')}</Link>
               <span>/</span>
-              <span className="text-foreground">새 Document</span>
+              <span className="text-foreground">{t('repository.newDocument')}</span>
             </div>
 
-            <h1 className="mb-8 text-3xl font-bold">새 Document 추가</h1>
+            <h1 className="mb-8 text-3xl font-bold">{t('newDocument.title')}</h1>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* URL Input */}
               <div className="space-y-2">
-                <Label htmlFor="url">🔗 링크 URL *</Label>
+                <Label htmlFor="url">{t('newDocument.urlLabel')}</Label>
                 <div className="flex gap-2">
                   <Input
                     id="url"
                     type="url"
-                    placeholder="https://example.com"
+                    placeholder={t('newDocument.urlPlaceholder')}
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     className="flex-1"
@@ -121,7 +123,7 @@ export default function NewDocumentPage() {
                     onClick={fetchMetadata}
                     disabled={isLoadingMetadata || !url}
                   >
-                    {isLoadingMetadata ? '가져오는 중...' : '가져오기'}
+                    {isLoadingMetadata ? t('newDocument.fetching') : t('newDocument.fetch')}
                   </Button>
                 </div>
               </div>
@@ -130,12 +132,12 @@ export default function NewDocumentPage() {
               {metadata && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">링크 프리뷰</CardTitle>
+                    <CardTitle className="text-base">{t('newDocument.linkPreview')}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2 text-sm">
-                      {metadata.ogTitle && <p><strong>제목:</strong> {metadata.ogTitle}</p>}
-                      {metadata.ogDescription && <p><strong>설명:</strong> {metadata.ogDescription}</p>}
+                      {metadata.ogTitle && <p><strong>{t('newDocument.titleField')}</strong> {metadata.ogTitle}</p>}
+                      {metadata.ogDescription && <p><strong>{t('newDocument.descriptionField')}</strong> {metadata.ogDescription}</p>}
                       {metadata.ogImage && (
                         <img
                           src={metadata.ogImage}
@@ -150,10 +152,10 @@ export default function NewDocumentPage() {
 
               {/* Title Input */}
               <div className="space-y-2">
-                <Label htmlFor="title">📄 제목 *</Label>
+                <Label htmlFor="title">{t('newDocument.titleLabel')}</Label>
                 <Input
                   id="title"
-                  placeholder="Document 제목"
+                  placeholder={t('newDocument.titlePlaceholder')}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                 />
@@ -161,10 +163,10 @@ export default function NewDocumentPage() {
 
               {/* Content Input */}
               <div className="space-y-2">
-                <Label htmlFor="content">📝 노트 (마크다운)</Label>
+                <Label htmlFor="content">{t('newDocument.contentLabel')}</Label>
                 <Textarea
                   id="content"
-                  placeholder="마크다운 형식으로 노트를 작성하세요...&#10;&#10;# 제목&#10;## 부제목&#10;- 목록"
+                  placeholder={t('newDocument.contentPlaceholder')}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   rows={15}
@@ -174,10 +176,10 @@ export default function NewDocumentPage() {
 
               {/* Tags Input */}
               <div className="space-y-2">
-                <Label htmlFor="tags">🏷️ 태그</Label>
+                <Label htmlFor="tags">{t('newDocument.tagsLabel')}</Label>
                 <Input
                   id="tags"
-                  placeholder="쉼표로 구분 (예: react, nextjs, typescript)"
+                  placeholder={t('newDocument.tagsPlaceholder')}
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                 />
@@ -190,9 +192,9 @@ export default function NewDocumentPage() {
                   variant="outline"
                   onClick={() => router.back()}
                 >
-                  취소
+                  {t('newDocument.cancel')}
                 </Button>
-                <Button type="submit">저장하기</Button>
+                <Button type="submit">{t('newDocument.save')}</Button>
               </div>
             </form>
           </div>

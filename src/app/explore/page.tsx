@@ -10,10 +10,12 @@ import { FileText, Globe } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function ExplorePage() {
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const t = useTranslations();
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -26,7 +28,7 @@ export default function ExplorePage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="text-2xl">🔗</div>
-          <p className="mt-2 text-sm text-muted-foreground">로딩 중...</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -42,9 +44,9 @@ export default function ExplorePage() {
         <main className="flex-1 overflow-auto">
           <div className="container py-8">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold">🌍 Public Deck 탐색</h1>
+              <h1 className="text-3xl font-bold">{t('explore.title')}</h1>
               <p className="mt-2 text-muted-foreground">
-                다른 사용자들이 공개한 Deck을 둘러보세요
+                {t('explore.subtitle')}
               </p>
             </div>
 
@@ -73,7 +75,7 @@ export default function ExplorePage() {
                           </div>
                           {deck.user && (
                             <div className="flex items-center gap-1">
-                              <span>by</span>
+                              <span>{t('explore.by')}</span>
                               <span className="font-medium">@{deck.user.username}</span>
                             </div>
                           )}
@@ -87,9 +89,9 @@ export default function ExplorePage() {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <Globe className="mb-4 h-12 w-12 text-muted-foreground" />
-                  <p className="mb-2 text-lg font-medium">공개된 Deck이 없습니다</p>
+                  <p className="mb-2 text-lg font-medium">{t('explore.noPublicDecks')}</p>
                   <p className="text-sm text-muted-foreground">
-                    곧 멋진 Deck들이 공유될 예정입니다!
+                    {t('explore.comingSoon')}
                   </p>
                 </CardContent>
               </Card>

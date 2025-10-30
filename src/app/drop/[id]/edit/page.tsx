@@ -15,8 +15,10 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 export default function DropEditPage() {
+    const t = useTranslations();
     const params = useParams();
     const router = useRouter();
     const { user, isLoading } = useAuth();
@@ -43,14 +45,14 @@ export default function DropEditPage() {
                     setTitle(dropData.title);
                     setUrl(dropData.url);
                     setMemo(dropData.memo || '');
-                    // tags가 배열이면 join, 문자열이면 그대로 사용
+                    // Join tags if array, use as-is if string
                     const tagsValue = dropData.tags 
                         ? (Array.isArray(dropData.tags) ? dropData.tags.join(', ') : dropData.tags)
                         : '';
                     setTags(tagsValue);
                 } catch (error) {
                     console.error('Failed to load drop:', error);
-                    toast.error('Drop을 불러오는데 실패했습니다.');
+                    toast.error(t('dropEdit.loadError'));
                 }
             }
         };
@@ -66,7 +68,7 @@ export default function DropEditPage() {
         if (!drop) return;
 
         if (!title.trim() || !url.trim()) {
-            toast.error('제목과 URL은 필수입니다.');
+            toast.error(t('dropEdit.requiredError'));
             return;
         }
 
@@ -87,11 +89,11 @@ export default function DropEditPage() {
                 }
             );
 
-            toast.success('Drop이 수정되었습니다.');
+            toast.success(t('dropEdit.updateSuccess'));
             router.push(`/drop/${drop.id}`);
         } catch (error) {
             console.error('Failed to update drop:', error);
-            toast.error('Drop 수정에 실패했습니다.');
+            toast.error(t('dropEdit.updateError'));
         } finally {
             setIsSaving(false);
         }
@@ -102,7 +104,7 @@ export default function DropEditPage() {
             <div className="flex min-h-screen items-center justify-center">
                 <div className="text-center">
                     <div className="text-2xl">🔗</div>
-                    <p className="mt-2 text-sm text-muted-foreground">로딩 중...</p>
+                    <p className="mt-2 text-sm text-muted-foreground">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -117,26 +119,26 @@ export default function DropEditPage() {
                     <div className="container max-w-3xl py-8">
                         {/* Breadcrumb */}
                         <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-                            <Link href="/dashboard" className="hover:text-foreground">홈</Link>
+                            <Link href="/dashboard" className="hover:text-foreground">{t('common.home')}</Link>
                             <span>/</span>
                             <Link href={`/deck/${drop.deck}`} className="hover:text-foreground">
-                                덱으로 이동
+                                {t('dropEdit.goToDeck')}
                             </Link>
                             <span>/</span>
                             <Link href={`/drop/${drop.id}`} className="hover:text-foreground">
                                 {drop.title}
                             </Link>
                             <span>/</span>
-                            <span className="text-foreground">수정</span>
+                            <span className="text-foreground">{t('dropEdit.edit')}</span>
                         </div>
 
                         {/* Header */}
                         <div className="mb-8 flex items-center justify-between">
-                            <h1 className="text-3xl font-bold">Drop 수정</h1>
+                            <h1 className="text-3xl font-bold">{t('dropEdit.title')}</h1>
                             <Button variant="outline" asChild>
                                 <Link href={`/drop/${drop.id}`}>
                                     <ArrowLeft className="mr-2 h-4 w-4" />
-                                    뒤로
+                                    {t('dropEdit.back')}
                                 </Link>
                             </Button>
                         </div>
@@ -145,61 +147,61 @@ export default function DropEditPage() {
                         <Card className="p-6">
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div>
-                                    <Label htmlFor="title">제목 *</Label>
+                                    <Label htmlFor="title">{t('dropEdit.titleLabel')}</Label>
                                     <Input
                                         id="title"
                                         value={title}
                                         onChange={(e) => setTitle(e.target.value)}
-                                        placeholder="링크 제목"
+                                        placeholder={t('dropEdit.titlePlaceholder')}
                                         required
                                         maxLength={255}
                                     />
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="url">URL *</Label>
+                                    <Label htmlFor="url">{t('dropEdit.urlLabel')}</Label>
                                     <Input
                                         id="url"
                                         type="url"
                                         value={url}
                                         onChange={(e) => setUrl(e.target.value)}
-                                        placeholder="https://example.com"
+                                        placeholder={t('dropEdit.urlPlaceholder')}
                                         required
                                         maxLength={200}
                                     />
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="memo">메모</Label>
+                                    <Label htmlFor="memo">{t('dropEdit.memoLabel')}</Label>
                                     <Textarea
                                         id="memo"
                                         value={memo}
                                         onChange={(e) => setMemo(e.target.value)}
-                                        placeholder="이 링크에 대한 메모를 작성하세요..."
+                                        placeholder={t('dropEdit.memoPlaceholder')}
                                         rows={6}
                                     />
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="tags">태그</Label>
+                                    <Label htmlFor="tags">{t('dropEdit.tagsLabel')}</Label>
                                     <Input
                                         id="tags"
                                         value={tags}
                                         onChange={(e) => setTags(e.target.value)}
-                                        placeholder="태그1, 태그2, 태그3"
+                                        placeholder={t('dropEdit.tagsPlaceholder')}
                                     />
                                     <p className="mt-1 text-xs text-muted-foreground">
-                                        쉼표(,)로 구분하여 여러 태그를 입력할 수 있습니다.
+                                        {t('dropEdit.tagsHelp')}
                                     </p>
                                 </div>
 
                                 <div className="flex gap-3">
                                     <Button type="submit" disabled={isSaving}>
                                         <Save className="mr-2 h-4 w-4" />
-                                        {isSaving ? '저장 중...' : '저장'}
+                                        {isSaving ? t('dropEdit.saving') : t('dropEdit.save')}
                                     </Button>
                                     <Button type="button" variant="outline" onClick={() => router.back()}>
-                                        취소
+                                        {t('dropEdit.cancel')}
                                     </Button>
                                 </div>
                             </form>

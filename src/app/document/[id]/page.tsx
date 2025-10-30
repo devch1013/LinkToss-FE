@@ -12,8 +12,10 @@ import { mockDocumentApi } from '@/lib/mock-api';
 import type { Document } from '@/types';
 import Link from 'next/link';
 import { ExternalLink, Edit, Trash2, Share } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function DocumentDetailPage() {
+  const t = useTranslations();
   const params = useParams();
   const router = useRouter();
   const { user, isLoading } = useAuth();
@@ -39,7 +41,7 @@ export default function DocumentDetailPage() {
   }, [user, params.id]);
 
   const handleDelete = async () => {
-    if (document && confirm('정말 삭제하시겠습니까?')) {
+    if (document && confirm(t('document.confirmDelete'))) {
       await mockDocumentApi.deleteDocument(document.id);
       router.push(`/repository/${document.repositoryId}`);
     }
@@ -50,7 +52,7 @@ export default function DocumentDetailPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="text-2xl">🔗</div>
-          <p className="mt-2 text-sm text-muted-foreground">로딩 중...</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -65,7 +67,7 @@ export default function DocumentDetailPage() {
           <div className="container max-w-4xl py-8">
             {/* Breadcrumb */}
             <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-              <Link href="/dashboard" className="hover:text-foreground">홈</Link>
+              <Link href="/dashboard" className="hover:text-foreground">{t('document.home')}</Link>
               <span>/</span>
               {document.repository && (
                 <>
@@ -96,16 +98,16 @@ export default function DocumentDetailPage() {
                 <Button size="sm" variant="outline" asChild>
                   <Link href={`/document/${document.id}/edit`}>
                     <Edit className="mr-2 h-4 w-4" />
-                    수정
+                    {t('document.edit')}
                   </Link>
                 </Button>
                 <Button size="sm" variant="outline" onClick={handleDelete}>
                   <Trash2 className="mr-2 h-4 w-4" />
-                  삭제
+                  {t('document.delete')}
                 </Button>
                 <Button size="sm" variant="outline">
                   <Share className="mr-2 h-4 w-4" />
-                  공유
+                  {t('document.share')}
                 </Button>
               </div>
             </div>
@@ -134,7 +136,7 @@ export default function DocumentDetailPage() {
             {/* Document Content */}
             {document.content && (
               <div className="mb-8">
-                <h2 className="mb-4 text-xl font-semibold">📝 노트</h2>
+                <h2 className="mb-4 text-xl font-semibold">{t('document.notes')}</h2>
                 <Card className="p-6">
                   <div className="prose prose-sm max-w-none dark:prose-invert">
                     {/* Simple markdown rendering - in real app, use react-markdown */}
@@ -161,7 +163,7 @@ export default function DocumentDetailPage() {
             {/* Tags */}
             {document.tags && document.tags.length > 0 && (
               <div className="mb-8">
-                <h2 className="mb-3 text-xl font-semibold">🏷️ 태그</h2>
+                <h2 className="mb-3 text-xl font-semibold">{t('document.tags')}</h2>
                 <div className="flex flex-wrap gap-2">
                   {document.tags.map((tag) => (
                     <Badge key={tag.id} variant="secondary" style={{ backgroundColor: tag.color + '20', color: tag.color }}>
@@ -174,8 +176,8 @@ export default function DocumentDetailPage() {
 
             {/* Meta Info */}
             <div className="text-sm text-muted-foreground">
-              <p>생성일: {new Date(document.createdAt).toLocaleDateString('ko-KR')}</p>
-              <p>수정일: {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</p>
+              <p>{t('document.createdAt')} {new Date(document.createdAt).toLocaleDateString('ko-KR')}</p>
+              <p>{t('document.updatedAt')} {new Date(document.updatedAt).toLocaleDateString('ko-KR')}</p>
             </div>
           </div>
         </main>

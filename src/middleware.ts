@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  return NextResponse.next();
+  const locale = request.cookies.get('NEXT_LOCALE')?.value || 'ko';
+  
+  const response = NextResponse.next();
+  response.headers.set('x-locale', locale);
+  
+  return response;
 }
 
 export const config = {

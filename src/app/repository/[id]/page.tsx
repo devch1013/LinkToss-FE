@@ -14,11 +14,13 @@ import { ExternalLink, Folder, Plus, Search, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function RepositoryDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { user, isLoading } = useAuth();
+  const t = useTranslations();
   const [repository, setRepository] = useState<Repository | null>(null);
   const [documents, setDocuments] = useState<Document[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,7 +53,7 @@ export default function RepositoryDetailPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="text-2xl">🔗</div>
-          <p className="mt-2 text-sm text-muted-foreground">로딩 중...</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -71,7 +73,7 @@ export default function RepositoryDetailPage() {
           <div className="container py-8">
             {/* Breadcrumb */}
             <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-              <Link href="/dashboard" className="hover:text-foreground">홈</Link>
+              <Link href="/dashboard" className="hover:text-foreground">{t('repository.home')}</Link>
               <span>/</span>
               <span className="text-foreground">{repository.name}</span>
             </div>
@@ -108,7 +110,7 @@ export default function RepositoryDetailPage() {
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Document 검색..."
+                  placeholder={t('repository.searching')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -116,24 +118,24 @@ export default function RepositoryDetailPage() {
               </div>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="정렬" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="recent">최근 생성순</SelectItem>
-                  <SelectItem value="title">제목순</SelectItem>
-                  <SelectItem value="updated">최근 수정순</SelectItem>
+                  <SelectItem value="recent">{t('repository.sortRecent')}</SelectItem>
+                  <SelectItem value="title">{t('repository.sortTitle')}</SelectItem>
+                  <SelectItem value="updated">{t('repository.sortUpdated')}</SelectItem>
                 </SelectContent>
               </Select>
               <Button asChild>
                 <Link href={`/repository/${repository.id}/new`}>
                   <Plus className="mr-2 h-4 w-4" />
-                  새 Document
+                  {t('repository.newDocument')}
                 </Link>
               </Button>
               <Button variant="outline" asChild>
                 <Link href={`/repository/${repository.id}/sub-repository`}>
                   <Plus className="mr-2 h-4 w-4" />
-                  Sub-repository
+                  {t('repository.subRepository')}
                 </Link>
               </Button>
             </div>
@@ -141,7 +143,7 @@ export default function RepositoryDetailPage() {
             {/* Sub-repositories */}
             {repository.subRepositories && repository.subRepositories.length > 0 && (
               <div className="mb-8">
-                <h2 className="mb-4 text-xl font-semibold">📁 Sub-repositories ({repository.subRepositories.length})</h2>
+                <h2 className="mb-4 text-xl font-semibold">{t('repository.subRepositories')} ({repository.subRepositories.length})</h2>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                   {repository.subRepositories.map((subRepo) => (
                     <Link key={subRepo.id} href={`/repository/${subRepo.id}`}>
@@ -164,7 +166,7 @@ export default function RepositoryDetailPage() {
 
             {/* Documents */}
             <div>
-              <h2 className="mb-4 text-xl font-semibold">📄 Documents ({filteredDocuments.length})</h2>
+              <h2 className="mb-4 text-xl font-semibold">{t('repository.documents')} ({filteredDocuments.length})</h2>
 
               {filteredDocuments.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -200,14 +202,14 @@ export default function RepositoryDetailPage() {
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <Folder className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <p className="mb-2 text-lg font-medium">아직 저장된 Document가 없습니다</p>
+                    <p className="mb-2 text-lg font-medium">{t('repository.noDocumentsYet')}</p>
                     <p className="mb-4 text-sm text-muted-foreground">
-                      첫 링크를 저장해보세요!
+                      {t('repository.saveFirstLink')}
                     </p>
                     <Button asChild>
                       <Link href={`/repository/${repository.id}/new`}>
                         <Plus className="mr-2 h-4 w-4" />
-                        새 Document 추가
+                        {t('repository.addNewDocument')}
                       </Link>
                     </Button>
                   </CardContent>

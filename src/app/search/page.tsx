@@ -12,8 +12,10 @@ import { ExternalLink, FileText, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function SearchPage() {
+  const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoading } = useAuth();
@@ -56,7 +58,7 @@ export default function SearchPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="text-2xl">🔗</div>
-          <p className="mt-2 text-sm text-muted-foreground">로딩 중...</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -69,14 +71,14 @@ export default function SearchPage() {
         <Sidebar />
         <main className="flex-1 overflow-auto">
           <div className="container py-8">
-            <h1 className="mb-6 text-3xl font-bold">🔍 검색</h1>
+            <h1 className="mb-6 text-3xl font-bold">{t('search.title')}</h1>
 
             {/* Search Input */}
             <div className="relative mb-8">
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Deck, Drop 검색..."
+                placeholder={t('search.placeholder')}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="h-12 pl-10 text-base"
@@ -87,12 +89,12 @@ export default function SearchPage() {
             {query.trim().length < 2 ? (
               <div className="text-center py-12">
                 <Search className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                <p className="text-lg font-medium">검색어를 입력하세요</p>
-                <p className="text-sm text-muted-foreground">최소 2자 이상 입력해주세요</p>
+                <p className="text-lg font-medium">{t('search.enterSearchTerm')}</p>
+                <p className="text-sm text-muted-foreground">{t('search.minTwoCharacters')}</p>
               </div>
             ) : isSearching ? (
               <div className="text-center py-12">
-                <p className="text-muted-foreground">검색 중...</p>
+                <p className="text-muted-foreground">{t('search.searching')}</p>
               </div>
             ) : (
               <>
@@ -100,7 +102,7 @@ export default function SearchPage() {
                 {decks.length > 0 && (
                   <div className="mb-8">
                     <h2 className="mb-4 text-xl font-semibold">
-                      📂 Decks ({decks.length})
+                      {t('search.decks')} ({decks.length})
                     </h2>
                     <div className="space-y-3">
                       {decks.map((deck) => (
@@ -132,7 +134,7 @@ export default function SearchPage() {
                 {drops.length > 0 && (
                   <div>
                     <h2 className="mb-4 text-xl font-semibold">
-                      📄 Drops ({drops.length})
+                      {t('search.drops')} ({drops.length})
                     </h2>
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {drops.map((drop) => (
@@ -170,9 +172,9 @@ export default function SearchPage() {
                 {decks.length === 0 && drops.length === 0 && (
                   <div className="text-center py-12">
                     <FileText className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                    <p className="text-lg font-medium">검색 결과가 없습니다</p>
+                    <p className="text-lg font-medium">{t('search.noResults')}</p>
                     <p className="text-sm text-muted-foreground">
-                      다른 검색어를 시도해보세요
+                      {t('search.tryDifferentSearch')}
                     </p>
                   </div>
                 )}
