@@ -15,6 +15,7 @@ import {
   Star,
   Trash2
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -28,6 +29,7 @@ export function Sidebar() {
   const [isResizing, setIsResizing] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const sidebarRef = useRef<HTMLElement>(null);
+  const t = useTranslations();
 
   const loadDecks = async () => {
     try {
@@ -155,7 +157,7 @@ export function Sidebar() {
             onClick={() => setIsCreateModalOpen(true)}
           >
             <Plus className="mr-2 h-4 w-4" />
-            새 Deck
+            {t('sidebar.newDeck')}
           </Button>
         </div>
 
@@ -175,19 +177,19 @@ export function Sidebar() {
           <Link href="/explore">
             <div className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent">
               <Globe className="h-4 w-4" />
-              <span>탐색</span>
+              <span>{t('sidebar.browse')}</span>
             </div>
           </Link>
           <Link href="/favorites">
             <div className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent">
               <Star className="h-4 w-4" />
-              <span>즐겨찾기</span>
+              <span>{t('sidebar.bookmark')}</span>
             </div>
           </Link>
           <Link href="/trash">
             <div className="flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent">
               <Trash2 className="h-4 w-4" />
-              <span>휴지통</span>
+              <span>{t('sidebar.trash')}</span>
             </div>
           </Link>
         </div>
