@@ -9,11 +9,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { dropsApi } from '@/lib/api-client';
 import { Edit, ExternalLink, MessageCircle, Share, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function DropDetailPage() {
+    const t = useTranslations();
     const params = useParams();
     const router = useRouter();
     const { user, isLoading } = useAuth();
@@ -60,7 +62,7 @@ export default function DropDetailPage() {
     }, [user, params.id]);
 
     const handleDelete = async () => {
-        if (drop && confirm('정말 삭제하시겠습니까?')) {
+        if (drop && confirm(t('drop.confirmDelete'))) {
             try {
                 await dropsApi.dropsDelete({ id: drop.id! });
                 router.push(`/deck/${drop.deck}`);
@@ -117,9 +119,9 @@ export default function DropDetailPage() {
                     <div className="flex items-start gap-3">
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                                <span className="font-medium text-sm">{comment.user_name || '익명'}</span>
+                                <span className="font-medium text-sm">{comment.user_name || t('common.anonymous')}</span>
                                 <span className="text-xs text-muted-foreground">
-                                    {new Date(comment.created_at!).toLocaleDateString('ko-KR')}
+                                    {new Date(comment.created_at!).toLocaleDateString('en-US')}
                                 </span>
                             </div>
                             <p className="text-sm">{comment.content}</p>
@@ -130,26 +132,26 @@ export default function DropDetailPage() {
                                 onClick={() => setReplyingTo(comment.id!)}
                             >
                                 <MessageCircle className="mr-1 h-3 w-3" />
-                                답글
+                                {t('drop.reply')}
                             </Button>
 
                             {replyingTo === comment.id && (
                                 <div className="mt-3">
                                     <Textarea
-                                        placeholder="답글을 입력하세요..."
+                                        placeholder={t('drop.replyPlaceholder')}
                                         value={replyContent}
                                         onChange={(e) => setReplyContent(e.target.value)}
                                         className="mb-2"
                                     />
                                     <div className="flex gap-2">
                                         <Button size="sm" onClick={() => handleReplySubmit(comment.id!)}>
-                                            작성
+                                            {t('common.submit')}
                                         </Button>
                                         <Button size="sm" variant="outline" onClick={() => {
                                             setReplyingTo(null);
                                             setReplyContent('');
                                         }}>
-                                            취소
+                                            {t('common.cancel')}
                                         </Button>
                                     </div>
                                 </div>
@@ -171,7 +173,7 @@ export default function DropDetailPage() {
             <div className="flex min-h-screen items-center justify-center">
                 <div className="text-center">
                     <div className="text-2xl">🔗</div>
-                    <p className="mt-2 text-sm text-muted-foreground">로딩 중...</p>
+                    <p className="mt-2 text-sm text-muted-foreground">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -186,10 +188,10 @@ export default function DropDetailPage() {
                     <div className="container max-w-4xl py-8">
                         {/* Breadcrumb */}
                         <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-                            <Link href="/dashboard" className="hover:text-foreground">홈</Link>
+                            <Link href="/dashboard" className="hover:text-foreground">{t('common.home')}</Link>
                             <span>/</span>
                             <Link href={`/deck/${drop.deck}`} className="hover:text-foreground">
-                                덱으로 이동
+                                {t('drop.goToDeck')}
                             </Link>
                             <span>/</span>
                             <span className="text-foreground">{drop.title}</span>
@@ -213,16 +215,16 @@ export default function DropDetailPage() {
                                 <Button size="sm" variant="outline" asChild>
                                     <Link href={`/drop/${drop.id}/edit`}>
                                         <Edit className="mr-2 h-4 w-4" />
-                                        수정
+                                        {t('common.edit')}
                                     </Link>
                                 </Button>
                                 <Button size="sm" variant="outline" onClick={handleDelete}>
                                     <Trash2 className="mr-2 h-4 w-4" />
-                                    삭제
+                                    {t('common.delete')}
                                 </Button>
                                 <Button size="sm" variant="outline">
                                     <Share className="mr-2 h-4 w-4" />
-                                    공유
+                                    {t('common.share')}
                                 </Button>
                             </div>
                         </div>
@@ -230,7 +232,7 @@ export default function DropDetailPage() {
                         {/* Memo */}
                         {drop.memo && (
                             <div className="mb-8">
-                                <h2 className="mb-4 text-xl font-semibold">📝 메모</h2>
+                                <h2 className="mb-4 text-xl font-semibold">{t('drop.memo')}</h2>
                                 <Card className="p-6">
                                     <p className="text-sm whitespace-pre-wrap">{drop.memo}</p>
                                 </Card>
@@ -239,31 +241,31 @@ export default function DropDetailPage() {
 
                         {/* Meta Info */}
                         <div className="mb-8 text-sm text-muted-foreground">
-                            <p>생성일: {new Date(drop.created_at!).toLocaleDateString('ko-KR')}</p>
-                            <p>수정일: {new Date(drop.updated_at!).toLocaleDateString('ko-KR')}</p>
+                            <p>{t('drop.createdAt')}: {new Date(drop.created_at!).toLocaleDateString('en-US')}</p>
+                            <p>{t('drop.updatedAt')}: {new Date(drop.updated_at!).toLocaleDateString('en-US')}</p>
                         </div>
 
                         {/* Comments Section */}
                         <div className="mb-8">
-                            <h2 className="mb-4 text-xl font-semibold">💬 댓글 ({comments.length})</h2>
+                            <h2 className="mb-4 text-xl font-semibold">{t('drop.commentsCount', { count: comments.length })}</h2>
 
                             {/* New Comment Form */}
                             <Card className="p-4 mb-6">
                                 <Textarea
-                                    placeholder="댓글을 입력하세요..."
+                                    placeholder={t('drop.commentPlaceholder')}
                                     value={newComment}
                                     onChange={(e) => setNewComment(e.target.value)}
                                     className="mb-2"
                                 />
                                 <Button onClick={handleCommentSubmit} disabled={!newComment.trim()}>
-                                    댓글 작성
+                                    {t('drop.writeComment')}
                                 </Button>
                             </Card>
 
                             {/* Comments List */}
                             {comments.length === 0 ? (
                                 <p className="text-sm text-muted-foreground text-center py-8">
-                                    첫 댓글을 남겨보세요!
+                                    {t('drop.firstComment')}
                                 </p>
                             ) : (
                                 <div>

@@ -1,13 +1,13 @@
 import type { DashboardStats, Deck, DeckMember, Drop, Invitation, Tag, User } from '@/types';
 import {
-    mockCurrentUser,
-    mockDashboardStats,
-    mockDeckMembers,
-    mockDecks,
-    mockDrops,
-    mockInvitations,
-    mockTags,
-    mockUsers,
+  mockCurrentUser,
+  mockDashboardStats,
+  mockDeckMembers,
+  mockDecks,
+  mockDrops,
+  mockInvitations,
+  mockTags,
+  mockUsers,
 } from './mock-data';
 
 // Simulated API delay

@@ -9,11 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/contexts/AuthContext';
 import { usersApi } from '@/lib/api-client';
 import { ExternalLink, FileText, FolderOpen, Globe, Tag } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function DashboardPage() {
+  const t = useTranslations();
   const router = useRouter();
   const { user, isLoading } = useAuth();
   const [stats, setStats] = useState<Dashboard | null>(null);
@@ -40,7 +42,7 @@ export default function DashboardPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="text-2xl">🔗</div>
-          <p className="mt-2 text-sm text-muted-foreground">로딩 중...</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -55,9 +57,9 @@ export default function DashboardPage() {
           <div className="container py-8">
             {/* Greeting */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold">안녕하세요, {user.name}님! 👋</h1>
+              <h1 className="text-3xl font-bold">{t('dashboard.welcome', { name: user.name })}</h1>
               <p className="mt-2 text-muted-foreground">
-                LinkToss에서 링크를 효율적으로 관리하세요
+                {t('dashboard.welcomeMessage')}
               </p>
             </div>
 
@@ -66,52 +68,52 @@ export default function DashboardPage() {
               <div className="mb-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">총 Deck</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('dashboard.totalDecks')}</CardTitle>
                     <FolderOpen className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{stats.overview.deck_count}개</div>
                     <p className="text-xs text-muted-foreground">
-                      체계적으로 관리 중
+                      {t('dashboard.managedSystematically')}
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">총 Drop</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('dashboard.totalDrops')}</CardTitle>
                     <FileText className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{stats.overview.drop_count}개</div>
                     <p className="text-xs text-muted-foreground">
-                      저장된 링크
+                      {t('dashboard.savedLinks')}
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Public Deck</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('dashboard.publicDecks')}</CardTitle>
                     <Globe className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{stats.overview.public_deck_count}개</div>
                     <p className="text-xs text-muted-foreground">
-                      공유 중
+                      {t('dashboard.sharing')}
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">태그</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('dashboard.tags')}</CardTitle>
                     <Tag className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{stats.overview.tag_count}개</div>
                     <p className="text-xs text-muted-foreground">
-                      분류 중
+                      {t('dashboard.categorizing')}
                     </p>
                   </CardContent>
                 </Card>
@@ -121,9 +123,9 @@ export default function DashboardPage() {
             {/* Recent Drops */}
             <div className="mb-8">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">📌 최근 저장한 Drop</h2>
+                <h2 className="text-2xl font-semibold">{t('dashboard.recentDrops')}</h2>
                 <Button variant="ghost" asChild>
-                  <Link href="/search">모두 보기</Link>
+                  <Link href="/search">{t('dashboard.viewAll')}</Link>
                 </Button>
               </div>
 
@@ -161,9 +163,9 @@ export default function DashboardPage() {
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <FileText className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <p className="mb-2 text-lg font-medium">아직 저장된 Drop이 없습니다</p>
+                    <p className="mb-2 text-lg font-medium">{t('dashboard.noDropsYet')}</p>
                     <p className="mb-4 text-sm text-muted-foreground">
-                      첫 링크를 저장해보세요!
+                      {t('dashboard.saveFirstLink')}
                     </p>
                   </CardContent>
                 </Card>
@@ -173,7 +175,7 @@ export default function DashboardPage() {
             {/* Frequent Decks */}
             <div>
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-2xl font-semibold">📁 자주 사용하는 Deck</h2>
+                <h2 className="text-2xl font-semibold">{t('dashboard.frequentDecks')}</h2>
               </div>
 
               {stats && stats.frequent_decks.length > 0 ? (
@@ -201,7 +203,7 @@ export default function DashboardPage() {
                             </p>
                           )}
                           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                            <span>{deck.children_count || 0} items</span>
+                            <span>{deck.children_count || 0} {t('dashboard.items')}</span>
                           </div>
                         </CardContent>
                       </Card>
@@ -212,9 +214,9 @@ export default function DashboardPage() {
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center py-12">
                     <FolderOpen className="mb-4 h-12 w-12 text-muted-foreground" />
-                    <p className="mb-2 text-lg font-medium">Deck을 만들어보세요</p>
+                    <p className="mb-2 text-lg font-medium">{t('dashboard.createDeck')}</p>
                     <p className="mb-4 text-sm text-muted-foreground">
-                      링크를 체계적으로 관리할 수 있습니다
+                      {t('dashboard.manageLinkSystematically')}
                     </p>
                   </CardContent>
                 </Card>

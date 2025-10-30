@@ -1,19 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { mockRepositoryApi, mockDocumentApi } from '@/lib/mock-api';
-import type { Repository, Document } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { mockDocumentApi, mockRepositoryApi } from '@/lib/mock-api';
+import type { Document, Repository } from '@/types';
+import { ExternalLink, Folder, Plus, Search, Settings } from 'lucide-react';
 import Link from 'next/link';
-import { Plus, Search, Settings, ExternalLink, Folder } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function RepositoryDetailPage() {
   const params = useParams();

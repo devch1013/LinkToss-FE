@@ -12,8 +12,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useTranslations } from 'next-intl';
 
 export default function SettingsPage() {
+  const t = useTranslations();
   const router = useRouter();
   const { user, isLoading } = useAuth();
 
@@ -28,7 +30,7 @@ export default function SettingsPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="text-2xl">🔗</div>
-          <p className="mt-2 text-sm text-muted-foreground">로딩 중...</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t('common.loading')}</p>
         </div>
       </div>
     );
@@ -48,21 +50,21 @@ export default function SettingsPage() {
         <Sidebar />
         <main className="flex-1 overflow-auto">
           <div className="container max-w-4xl py-8">
-            <h1 className="mb-8 text-3xl font-bold">⚙️ 설정</h1>
+            <h1 className="mb-8 text-3xl font-bold">{t('settings.title')}</h1>
 
             <Tabs defaultValue="profile" className="space-y-6">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="profile">프로필</TabsTrigger>
-                <TabsTrigger value="security">보안</TabsTrigger>
-                <TabsTrigger value="notifications">알림</TabsTrigger>
+                <TabsTrigger value="profile">{t('settings.profile')}</TabsTrigger>
+                <TabsTrigger value="security">{t('settings.security')}</TabsTrigger>
+                <TabsTrigger value="notifications">{t('settings.notifications')}</TabsTrigger>
               </TabsList>
 
               {/* Profile Tab */}
               <TabsContent value="profile" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>프로필 정보</CardTitle>
-                    <CardDescription>공개 프로필 정보를 관리하세요</CardDescription>
+                    <CardTitle>{t('settings.profileInfo')}</CardTitle>
+                    <CardDescription>{t('settings.managePublicProfile')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center gap-4">
@@ -71,34 +73,34 @@ export default function SettingsPage() {
                         <AvatarFallback className="text-xl">{userInitials}</AvatarFallback>
                       </Avatar>
                       <div className="space-y-2">
-                        <Button variant="outline" size="sm">변경</Button>
-                        <Button variant="ghost" size="sm">삭제</Button>
+                        <Button variant="outline" size="sm">{t('settings.change')}</Button>
+                        <Button variant="ghost" size="sm">{t('common.delete')}</Button>
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="name">이름</Label>
+                      <Label htmlFor="name">{t('settings.name')}</Label>
                       <Input id="name" defaultValue={user.name} />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email">이메일</Label>
+                      <Label htmlFor="email">{t('settings.email')}</Label>
                       <Input id="email" defaultValue={user.email} disabled />
-                      <p className="text-xs text-muted-foreground">이메일은 변경할 수 없습니다</p>
+                      <p className="text-xs text-muted-foreground">{t('settings.emailCannotChange')}</p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="username">사용자명</Label>
+                      <Label htmlFor="username">{t('settings.username')}</Label>
                       <Input id="username" defaultValue={user.username} />
                       <p className="text-xs text-muted-foreground">linktoss.com/@{user.username}</p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="bio">자기소개</Label>
+                      <Label htmlFor="bio">{t('settings.bio')}</Label>
                       <Textarea id="bio" defaultValue={user.bio || ''} rows={3} />
                     </div>
 
-                    <Button>변경사항 저장</Button>
+                    <Button>{t('settings.saveChanges')}</Button>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -107,8 +109,8 @@ export default function SettingsPage() {
               <TabsContent value="security" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>연결된 소셜 계정</CardTitle>
-                    <CardDescription>소셜 로그인 계정을 관리하세요</CardDescription>
+                    <CardTitle>{t('settings.connectedSocialAccounts')}</CardTitle>
+                    <CardDescription>{t('settings.manageSocialAccounts')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between rounded-lg border p-4">
@@ -120,10 +122,10 @@ export default function SettingsPage() {
                         </div>
                         <div>
                           <p className="font-medium">Google</p>
-                          <p className="text-sm text-muted-foreground">연결됨</p>
+                          <p className="text-sm text-muted-foreground">{t('settings.connected')}</p>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm">연결 해제</Button>
+                      <Button variant="outline" size="sm">{t('settings.disconnect')}</Button>
                     </div>
 
                     <div className="flex items-center justify-between rounded-lg border p-4">
@@ -135,14 +137,14 @@ export default function SettingsPage() {
                         </div>
                         <div>
                           <p className="font-medium">GitHub</p>
-                          <p className="text-sm text-muted-foreground">연결 안 됨</p>
+                          <p className="text-sm text-muted-foreground">{t('settings.notConnected')}</p>
                         </div>
                       </div>
-                      <Button variant="outline" size="sm">연결</Button>
+                      <Button variant="outline" size="sm">{t('settings.connect')}</Button>
                     </div>
 
                     <p className="text-sm text-muted-foreground">
-                      ⚠️ 최소 1개의 소셜 계정이 연결되어 있어야 합니다
+                      {t('settings.minOneAccountRequired')}
                     </p>
                   </CardContent>
                 </Card>
@@ -152,35 +154,35 @@ export default function SettingsPage() {
               <TabsContent value="notifications" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>알림 설정</CardTitle>
-                    <CardDescription>알림 수신 방법을 선택하세요</CardDescription>
+                    <CardTitle>{t('settings.notificationSettings')}</CardTitle>
+                    <CardDescription>{t('settings.chooseNotificationMethod')}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">이메일 알림</p>
-                        <p className="text-sm text-muted-foreground">중요한 업데이트를 이메일로 받습니다</p>
+                        <p className="font-medium">{t('settings.emailNotifications')}</p>
+                        <p className="text-sm text-muted-foreground">{t('settings.emailNotificationsDesc')}</p>
                       </div>
                       <input type="checkbox" className="h-4 w-4" defaultChecked />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">브라우저 푸시 알림</p>
-                        <p className="text-sm text-muted-foreground">실시간 알림을 받습니다</p>
+                        <p className="font-medium">{t('settings.pushNotifications')}</p>
+                        <p className="text-sm text-muted-foreground">{t('settings.pushNotificationsDesc')}</p>
                       </div>
                       <input type="checkbox" className="h-4 w-4" />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">Repository 초대</p>
-                        <p className="text-sm text-muted-foreground">누군가 나를 Repository에 초대했을 때</p>
+                        <p className="font-medium">{t('settings.repositoryInvitation')}</p>
+                        <p className="text-sm text-muted-foreground">{t('settings.repositoryInvitationDesc')}</p>
                       </div>
                       <input type="checkbox" className="h-4 w-4" defaultChecked />
                     </div>
 
-                    <Button>저장</Button>
+                    <Button>{t('settings.save')}</Button>
                   </CardContent>
                 </Card>
               </TabsContent>
