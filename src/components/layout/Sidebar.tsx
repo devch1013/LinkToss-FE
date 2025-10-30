@@ -44,6 +44,43 @@ export function Sidebar() {
     loadDecks();
   }, []);
 
+  // Auto-expand parent decks of the selected deck
+  useEffect(() => {
+    if (deckTree.length === 0 || !pathname.startsWith('/deck/')) return;
+
+    const deckId = pathname.split('/deck/')[1]?.split('/')[0];
+    if (!deckId) return;
+
+    // Find all parent deck IDs for the selected deck
+    const findParentIds = (
+      decks: DeckTree[],
+      targetId: string,
+      parents: string[] = []
+    ): string[] | null => {
+      for (const deck of decks) {
+        if (deck.id === targetId) {
+          return parents;
+        }
+
+        const children = (deck.children as unknown as DeckTree[]) || [];
+        if (Array.isArray(children) && children.length > 0) {
+          const found = findParentIds(children, targetId, [...parents, deck.id || '']);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    const parentIds = findParentIds(deckTree, deckId);
+    if (parentIds && parentIds.length > 0) {
+      setExpandedIds(prev => {
+        const newSet = new Set(prev);
+        parentIds.forEach(id => newSet.add(id));
+        return newSet;
+      });
+    }
+  }, [pathname, deckTree]);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing) return;

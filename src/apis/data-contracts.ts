@@ -189,6 +189,7 @@ export interface Drop {
    * @maxLength 200
    */
   meta_image_url?: string | null;
+  breadcrumb?: Breadcrumb[];
   /**
    * Created at
    * @format date-time
