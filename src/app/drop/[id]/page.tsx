@@ -1,6 +1,6 @@
 'use client';
 
-import type { CommentTree, Drop } from '@/apis/data-contracts';
+import type { CommentTree, DropDetail } from '@/apis/data-contracts';
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ export default function DropDetailPage() {
     const params = useParams();
     const router = useRouter();
     const { user, isLoading } = useAuth();
-    const [drop, setDrop] = useState<Drop | null>(null);
+    const [drop, setDrop] = useState<DropDetail | null>(null);
     const [comments, setComments] = useState<CommentTree[]>([]);
     const [newComment, setNewComment] = useState('');
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
@@ -189,10 +189,14 @@ export default function DropDetailPage() {
                         {/* Breadcrumb */}
                         <div className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
                             <Link href="/dashboard" className="hover:text-foreground">{t('common.home')}</Link>
-                            <span>/</span>
-                            <Link href={`/deck/${drop.deck}`} className="hover:text-foreground">
-                                {t('drop.goToDeck')}
-                            </Link>
+                            {drop.breadcrumb && drop.breadcrumb.map((crumb) => (
+                                <div key={crumb.id} className="flex items-center gap-2">
+                                    <span>/</span>
+                                    <Link href={`/deck/${crumb.id}`} className="hover:text-foreground">
+                                        {crumb.name}
+                                    </Link>
+                                </div>
+                            ))}
                             <span>/</span>
                             <span className="text-foreground">{drop.title}</span>
                         </div>

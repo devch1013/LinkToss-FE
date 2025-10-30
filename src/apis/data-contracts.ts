@@ -189,7 +189,6 @@ export interface Drop {
    * @maxLength 200
    */
   meta_image_url?: string | null;
-  breadcrumb?: Breadcrumb[];
   /**
    * Created at
    * @format date-time
@@ -411,6 +410,67 @@ export interface CommentUpdate {
    * @minLength 1
    */
   content: string;
+}
+
+export interface DropDetail {
+  /**
+   * Id
+   * @format uuid
+   */
+  id?: string;
+  /**
+   * Title
+   * @minLength 1
+   * @maxLength 255
+   */
+  title: string;
+  /** Content */
+  content?: string | null;
+  /**
+   * Url
+   * @format uri
+   * @minLength 1
+   * @maxLength 200
+   */
+  url: string;
+  /** Memo */
+  memo?: string | null;
+  /**
+   * Deck
+   * @format uuid
+   */
+  deck: string;
+  /** Tags */
+  tags?: string;
+  /**
+   * Favicon url
+   * @format uri
+   * @maxLength 200
+   */
+  favicon_url?: string | null;
+  /**
+   * Screenshot url
+   * @format uri
+   * @maxLength 200
+   */
+  screenshot_url?: string | null;
+  /**
+   * Meta image url
+   * @format uri
+   * @maxLength 200
+   */
+  meta_image_url?: string | null;
+  breadcrumb?: Breadcrumb[];
+  /**
+   * Created at
+   * @format date-time
+   */
+  created_at?: string;
+  /**
+   * Updated at
+   * @format date-time
+   */
+  updated_at?: string;
 }
 
 export interface DropUpdate {
@@ -705,7 +765,7 @@ export interface DropsReadParams {
   id: string;
 }
 
-export type DropsReadData = Drop;
+export type DropsReadData = DropDetail;
 
 export interface DropsUpdateParams {
   id: string;
