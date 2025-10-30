@@ -27,7 +27,8 @@
     "totalDrops": "Total Drops",
     "viewAll": "View All",
     "welcome": "Welcome, {name}! 👋",
-    "welcomeMessage": "Manage your links efficiently in LinkToss"
+    "welcomeMessage": "Manage your links efficiently in LinkToss",
+    "count": "{count}"
   },
   "deck": {
     "addNewDrop": "Add New Drop",

@@ -72,7 +72,7 @@ export default function DashboardPage() {
                     <FolderOpen className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.deck_count}개</div>
+                    <div className="text-2xl font-bold">{t('dashboard.count', { count: stats.overview.deck_count })}</div>
                     <p className="text-xs text-muted-foreground">
                       {t('dashboard.managedSystematically')}
                     </p>
@@ -85,7 +85,7 @@ export default function DashboardPage() {
                     <FileText className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.drop_count}개</div>
+                    <div className="text-2xl font-bold">{t('dashboard.count', { count: stats.overview.drop_count })}</div>
                     <p className="text-xs text-muted-foreground">
                       {t('dashboard.savedLinks')}
                     </p>
@@ -98,7 +98,7 @@ export default function DashboardPage() {
                     <Globe className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.public_deck_count}개</div>
+                    <div className="text-2xl font-bold">{t('dashboard.count', { count: stats.overview.public_deck_count })}</div>
                     <p className="text-xs text-muted-foreground">
                       {t('dashboard.sharing')}
                     </p>
@@ -111,7 +111,7 @@ export default function DashboardPage() {
                     <Tag className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{stats.overview.tag_count}개</div>
+                    <div className="text-2xl font-bold">{t('dashboard.count', { count: stats.overview.tag_count })}</div>
                     <p className="text-xs text-muted-foreground">
                       {t('dashboard.categorizing')}
                     </p>

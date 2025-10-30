@@ -27,7 +27,8 @@
     "totalDrops": "총 Drop",
     "viewAll": "모두 보기",
     "welcome": "환영합니다, {name}님! 👋",
-    "welcomeMessage": "LinkToss에서 링크를 효율적으로 관리하세요"
+    "welcomeMessage": "LinkToss에서 링크를 효율적으로 관리하세요",
+    "count": "{count}개"
   },
   "deck": {
     "addNewDrop": "새 Drop 추가",
