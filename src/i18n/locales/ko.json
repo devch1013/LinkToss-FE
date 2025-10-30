@@ -226,5 +226,10 @@
     "bookmark": "즐겨찾기",
     "browse": "탐색",
     "trash": "휴지통"
+  },
+  "header": {
+    "profile": "프로필",
+    "setting": "설정",
+    "logout": "로그아웃"
   }
 }

@@ -226,5 +226,10 @@
     "bookmark": "Bookmark",
     "browse": "Browse",
     "trash": "Trash"
+  },
+  "header": {
+    "profile": "Profile",
+    "setting": "Setting",
+    "logout": "Logout"
   }
 }

@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,11 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Bell, Search, LogOut, Settings, User } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Bell, LogOut, Search, Settings, User } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 export function Header() {
   const { user, logout } = useAuth();
+  const t = useTranslations();
 
   if (!user) return null;
 
@@ -41,7 +43,7 @@ export function Header() {
             <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
               type="search"
-              placeholder="Repository, Document 검색... (Cmd+K)"
+              placeholder={t('search.placeholder')}
               className="h-9 w-full rounded-md border border-input bg-transparent pl-8 pr-4 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             />
           </div>
@@ -76,19 +78,19 @@ export function Header() {
               <DropdownMenuItem asChild>
                 <Link href="/settings/profile" className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
-                  <span>프로필</span>
+                  <span>{t('header.profile')}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href="/settings" className="cursor-pointer">
                   <Settings className="mr-2 h-4 w-4" />
-                  <span>설정</span>
+                  <span>{t('header.setting')}</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout} className="cursor-pointer text-red-600">
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>로그아웃</span>
+                <span>{t('header.logout')}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
