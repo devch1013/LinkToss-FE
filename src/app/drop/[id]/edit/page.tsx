@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TagInput } from '@/components/ui/tag-input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { dropsApi } from '@/lib/api-client';
@@ -26,7 +27,7 @@ export default function DropEditPage() {
     const [title, setTitle] = useState('');
     const [url, setUrl] = useState('');
     const [memo, setMemo] = useState('');
-    const [tags, setTags] = useState('');
+    const [tags, setTags] = useState<string[]>([]);
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
@@ -45,10 +46,10 @@ export default function DropEditPage() {
                     setTitle(dropData.title);
                     setUrl(dropData.url);
                     setMemo(dropData.memo || '');
-                    // Join tags if array, use as-is if string
-                    const tagsValue = dropData.tags 
-                        ? (Array.isArray(dropData.tags) ? dropData.tags.join(', ') : dropData.tags)
-                        : '';
+                    // Handle tags as array
+                    const tagsValue = dropData.tags
+                        ? (Array.isArray(dropData.tags) ? dropData.tags : [dropData.tags])
+                        : [];
                     setTags(tagsValue);
                 } catch (error) {
                     console.error('Failed to load drop:', error);
@@ -74,18 +75,13 @@ export default function DropEditPage() {
 
         setIsSaving(true);
         try {
-            const tagArray = tags
-                .split(',')
-                .map(tag => tag.trim())
-                .filter(tag => tag.length > 0);
-
             await dropsApi.dropsUpdate(
                 { id: drop.id! },
                 {
                     title: title.trim(),
                     url: url.trim(),
                     memo: memo.trim() || null,
-                    tags: tagArray.length > 0 ? tagArray : undefined,
+                    tags: tags.length > 0 ? tags : undefined,
                 }
             );
 
@@ -184,10 +180,10 @@ export default function DropEditPage() {
 
                                 <div>
                                     <Label htmlFor="tags">{t('dropEdit.tagsLabel')}</Label>
-                                    <Input
+                                    <TagInput
                                         id="tags"
                                         value={tags}
-                                        onChange={(e) => setTags(e.target.value)}
+                                        onChange={setTags}
                                         placeholder={t('dropEdit.tagsPlaceholder')}
                                     />
                                     <p className="mt-1 text-xs text-muted-foreground">

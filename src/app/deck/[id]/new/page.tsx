@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TagInput } from '@/components/ui/tag-input';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/contexts/AuthContext';
 import { decksApi, dropsApi } from '@/lib/api-client';
@@ -24,7 +25,7 @@ export default function NewDropPage() {
     const [url, setUrl] = useState('');
     const [title, setTitle] = useState('');
     const [memo, setMemo] = useState('');
-    const [tags, setTags] = useState('');
+    const [tags, setTags] = useState<string[]>([]);
 
     useEffect(() => {
         if (!isLoading && !user) {
@@ -58,15 +59,13 @@ export default function NewDropPage() {
         }
 
         try {
-            const tagArray = tags.split(',').map(t => t.trim()).filter(Boolean);
-
             await dropsApi.dropsCreate({
                 deck: params.id as string,
                 title,
                 url,
                 memo: memo || null,
                 content: null,
-                tags: tagArray,
+                tags,
             });
 
             toast.success(t('newDrop.createSuccess'));
@@ -156,11 +155,11 @@ export default function NewDropPage() {
                             {/* Tags Input */}
                             <div className="space-y-2">
                                 <Label htmlFor="tags">{t('newDrop.tagsLabel')}</Label>
-                                <Input
+                                <TagInput
                                     id="tags"
                                     placeholder={t('newDrop.tagsPlaceholder')}
                                     value={tags}
-                                    onChange={(e) => setTags(e.target.value)}
+                                    onChange={setTags}
                                 />
                             </div>
 
