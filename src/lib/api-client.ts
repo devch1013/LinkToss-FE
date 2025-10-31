@@ -36,53 +36,73 @@ export const dropsApi = new Drops({
   securityWorker,
 });
 
-// 응답 인터셉터 - 토큰 만료 시 자동 갱신
-usersApi.instance.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
+// 응답 인터셉터 - 토큰 만료 시 자동 갱신 및 에러 처리
+const responseErrorHandler = async (error: any) => {
+  const originalRequest = error.config;
 
-    // 401 에러이고 재시도하지 않은 요청인 경우
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const refreshToken = localStorage.getItem('refresh_token');
-        if (refreshToken) {
-          const response = await usersApi.usersRefresh({
-            refresh_token: refreshToken,
-          });
-
-          const data = response.data;
-          localStorage.setItem('access_token', data.access_token);
-          localStorage.setItem('refresh_token', data.refresh_token);
-
-          originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-          return usersApi.instance(originalRequest);
-        }
-      } catch (refreshError) {
-        // 갱신 실패 시 로그아웃
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('user_id');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
-      }
-    }
-
+  // 500 에러 처리
+  if (error.response?.status === 500) {
+    window.location.href = '/error/500';
     return Promise.reject(error);
   }
+
+  // 403 에러 처리
+  if (error.response?.status === 403) {
+    window.location.href = '/error/403';
+    return Promise.reject(error);
+  }
+
+  // 404 에러 처리
+  if (error.response?.status === 404) {
+    window.location.href = '/error/404';
+    return Promise.reject(error);
+  }
+
+  // 401 에러이고 재시도하지 않은 요청인 경우
+  if (error.response?.status === 401 && !originalRequest._retry) {
+    originalRequest._retry = true;
+
+    try {
+      const refreshToken = localStorage.getItem('refresh_token');
+      if (refreshToken) {
+        const response = await usersApi.usersRefresh({
+          refresh_token: refreshToken,
+        });
+
+        const data = response.data;
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
+
+        originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+        return usersApi.instance(originalRequest);
+      }
+    } catch (refreshError) {
+      // 갱신 실패 시 로그아웃
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user_id');
+      window.location.href = '/login';
+      return Promise.reject(refreshError);
+    }
+  }
+
+  return Promise.reject(error);
+};
+
+usersApi.instance.interceptors.response.use(
+  (response) => response,
+  responseErrorHandler
 );
 
 // Decks, Drops에도 같은 인터셉터 적용
 decksApi.instance.interceptors.response.use(
   (response) => response,
-  usersApi.instance.interceptors.response.handlers[0].rejected
+  responseErrorHandler
 );
 
 dropsApi.instance.interceptors.response.use(
   (response) => response,
-  usersApi.instance.interceptors.response.handlers[0].rejected
+  responseErrorHandler
 );
 
 // 편의 API
